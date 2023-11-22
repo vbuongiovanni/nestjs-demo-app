@@ -3,7 +3,7 @@ import { CreateUserRequestDTO, UpdateUserRequestDTO } from './user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../../mongodb';
-// import { logger } from '../../main';
+import { logger } from '../../main';
 
 @Injectable()
 export class UsersService {
@@ -18,10 +18,10 @@ export class UsersService {
     const users = this.userModel
       .find()
       .lean()
-      // .catch((ex) => {
-      //   logger.error(`Error in users.service userModel.find(): ${ex.message}`, ex);
-      //   return [];
-      // });
+      .catch((ex) => {
+        logger.error(`Error in users.service userModel.find(): ${ex.message}`, ex);
+        return [];
+      });
     return users;
   }
 
@@ -29,10 +29,10 @@ export class UsersService {
     const user = this.userModel
       .findOne({ _id: id })
       .lean()
-      // .catch((ex) => {
-      //   logger.error(`Error in users.service userModel.findOne(${id}): ${ex.message}`, ex);
-      //   return null;
-      // });
+      .catch((ex) => {
+        logger.error(`Error in users.service userModel.findOne(${id}): ${ex.message}`, ex);
+        return null;
+      });
     return user;
   }
 
@@ -40,10 +40,10 @@ export class UsersService {
     const updatedUser = this.userModel
       .find({ _id: id }, user, { new: true })
       .lean()
-      // .catch((ex) => {
-      //   logger.error(`Error in users.service userModel.update(${id}, ${JSON.stringify(user)}): ${ex.message}`, ex);
-      //   return null;
-      // });
+      .catch((ex) => {
+        logger.error(`Error in users.service userModel.update(${id}, ${JSON.stringify(user)}): ${ex.message}`, ex);
+        return null;
+      });
     return updatedUser;
   }
 
@@ -51,10 +51,10 @@ export class UsersService {
     const deletedUser = this.userModel
       .findOneAndDelete({ _id: id })
       .lean()
-      // .catch((ex) => {
-      //   logger.error(`Error in users.service userModel.findOneAndDelete(${id}): ${ex.message}`, ex);
-      //   return null;
-      // });
+      .catch((ex) => {
+        logger.error(`Error in users.service userModel.findOneAndDelete(${id}): ${ex.message}`, ex);
+        return null;
+      });
     return deletedUser;
   }
 }

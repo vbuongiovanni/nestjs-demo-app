@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes } from '@nestjs/common';
-// import { HashPasswordPipe } from '../../common/pipes';
+import { HashPasswordPipe } from '../../common/pipes/hash-password.pipe';
 import { UsersService } from './users.service';
 import { CreateUserRequestDTO, UpdateUserRequestDTO, UserResponseDTO } from './user.dto';
 import { plainToInstance } from 'class-transformer';
@@ -9,7 +9,7 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post()
-  // @UsePipes(HashPasswordPipe)
+  @UsePipes(HashPasswordPipe)
   async createUser(@Body() createUserBody: CreateUserRequestDTO): Promise<UserResponseDTO> {
     const newUser = await this.usersService.createUser(createUserBody);
     return plainToInstance(UserResponseDTO, newUser);

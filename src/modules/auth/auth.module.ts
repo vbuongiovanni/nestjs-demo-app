@@ -2,9 +2,11 @@ import { Module } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { MongooseModule } from '@nestjs/mongoose';
-import { 
+import {
   // User, UserSchema,
-  Auth, AuthSchema } from '../../mongodb';
+  Auth,
+  AuthSchema,
+} from '../../mongodb';
 
 @Module({
   imports: [
