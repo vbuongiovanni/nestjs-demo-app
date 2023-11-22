@@ -35,7 +35,7 @@ describe('UsersController', () => {
       });
 
       it('should return the createUser method of the UsersService', async () => {
-        console.log('newUserResponse', newUserResponse)
+        console.log('newUserResponse', newUserResponse);
         expect(newUserResponse).toEqual(createUserStub());
       });
     });
