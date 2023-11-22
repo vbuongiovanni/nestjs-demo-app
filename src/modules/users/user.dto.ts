@@ -1,6 +1,7 @@
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
+import { Types } from 'mongoose';
 
-export class UserRequestDTO {
+export class CreateUserRequestDTO {
   @IsNotEmpty()
   name: string;
 
@@ -12,7 +13,25 @@ export class UserRequestDTO {
   password: string;
 }
 
+export class UpdateUserRequestDTO {
+  @IsOptional()
+  @IsNotEmpty()
+  name: string;
+
+  @IsOptional()
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+
+  @IsOptional()
+  @IsNotEmpty()
+  password: string;
+}
+
 export class UserResponseDTO {
+  @IsNotEmpty()
+  _id: Types.ObjectId;
+
   @IsNotEmpty()
   name: string;
 

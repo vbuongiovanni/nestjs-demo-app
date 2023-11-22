@@ -1,9 +1,4 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Observable } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
@@ -19,16 +14,11 @@ export class AuthGuard implements CanActivate {
     private readonly reflector: Reflector,
     @InjectModel(Auth.name) private readonly authModel: Model<AuthDocument>,
   ) {}
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
     const authHeader = request.header('Authorization');
     const authKey = this.configService.get<string>('authKey');
-    const isPublic = this.reflector.get<boolean>(
-      'isPublic',
-      context.getHandler(),
-    );
+    const isPublic = this.reflector.get<boolean>('isPublic', context.getHandler());
     if (isPublic) return true;
 
     if (authHeader.includes('Bearer ')) {

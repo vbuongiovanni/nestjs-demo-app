@@ -1,5 +1,5 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
-import { RequestLogger, RequestLoggerDocument } from 'src/mongodb';
+import { RequestLogger, RequestLoggerDocument } from '../../mongodb';
 import { Model } from 'mongoose';
 import { InjectModel } from '@nestjs/mongoose';
 import { Request, Response } from 'express';
@@ -16,8 +16,7 @@ export class RequestLoggerMiddleware implements NestMiddleware {
     res.on('finish', () => {
       const statusCode = res.statusCode;
 
-      const clientIp =
-        req.ip || req.headers['x-client-ip'] || req.connection.remoteAddress;
+      const clientIp = req.ip || req.headers['x-client-ip'] || req.connection.remoteAddress;
       const authorization = req.headers['authorization'];
 
       // only retains authorization and body for 400 or higher status codes:

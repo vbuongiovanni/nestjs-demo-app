@@ -1,10 +1,6 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import {
-  AuthLogoutRequestDTO,
-  AuthRequestDTO,
-  AuthResponseDTO,
-} from './auth.dto';
+import { AuthLogoutRequestDTO, AuthRequestDTO, AuthResponseDTO } from './auth.dto';
 import { plainToInstance } from 'class-transformer';
 import { Public } from '../../common/decorators';
 
@@ -20,9 +16,7 @@ export class AuthController {
   }
 
   @Post('logout')
-  async logout(
-    @Body() body: AuthLogoutRequestDTO,
-  ): Promise<Record<string, never>> {
+  async logout(@Body() body: AuthLogoutRequestDTO): Promise<Record<string, never>> {
     const logoutResponse = await this.authService.logout(body);
     return logoutResponse;
   }

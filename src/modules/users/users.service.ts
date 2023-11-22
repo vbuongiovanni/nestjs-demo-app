@@ -1,39 +1,60 @@
 import { Injectable } from '@nestjs/common';
-import { UserRequestDTO } from './user.dto';
+import { CreateUserRequestDTO, UpdateUserRequestDTO } from './user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../../mongodb';
+// import { logger } from '../../main';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
-  ) {}
+  constructor(@InjectModel(User.name) private readonly userModel: Model<UserDocument>) {}
 
-  async create(user: UserRequestDTO) {
+  async createUser(user: CreateUserRequestDTO) {
     const newUser = new this.userModel(user);
     return newUser.save().then((user) => user.toObject());
   }
 
-  findAll() {
-    const users = this.userModel.find().lean();
+  findAllUsers() {
+    const users = this.userModel
+      .find()
+      .lean()
+      // .catch((ex) => {
+      //   logger.error(`Error in users.service userModel.find(): ${ex.message}`, ex);
+      //   return [];
+      // });
     return users;
   }
 
-  findOne(id: number) {
-    const user = this.userModel.findOne({ _id: id }).lean();
+  findUser(id: number) {
+    const user = this.userModel
+      .findOne({ _id: id })
+      .lean()
+      // .catch((ex) => {
+      //   logger.error(`Error in users.service userModel.findOne(${id}): ${ex.message}`, ex);
+      //   return null;
+      // });
     return user;
   }
 
-  update(id: number, user: UserRequestDTO) {
+  updateUser(id: number, user: UpdateUserRequestDTO) {
     const updatedUser = this.userModel
       .find({ _id: id }, user, { new: true })
-      .lean();
+      .lean()
+      // .catch((ex) => {
+      //   logger.error(`Error in users.service userModel.update(${id}, ${JSON.stringify(user)}): ${ex.message}`, ex);
+      //   return null;
+      // });
     return updatedUser;
   }
 
-  remove(id: number) {
-    const deletedUser = this.userModel.findOneAndDelete({ _id: id }).lean();
+  removeUser(id: number) {
+    const deletedUser = this.userModel
+      .findOneAndDelete({ _id: id })
+      .lean()
+      // .catch((ex) => {
+      //   logger.error(`Error in users.service userModel.findOneAndDelete(${id}): ${ex.message}`, ex);
+      //   return null;
+      // });
     return deletedUser;
   }
 }

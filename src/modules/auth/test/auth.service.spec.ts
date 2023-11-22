@@ -1,20 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthService } from '../auth.service';
-import {
-  User,
-  Auth,
-  AuthDocument,
-  UserDocument,
-} from '../../../mongodb/schemas';
+import { User, Auth, AuthDocument, UserDocument } from '../../../mongodb/schemas';
 import { getModelToken } from '@nestjs/mongoose';
 import * as bcrypt from 'bcrypt';
 import { MockAuthModel, MockUserModel, MockModel } from './auth.model';
-import {
-  authDocument,
-  authLogoutStub,
-  userLoginBody,
-  userLogoutBody,
-} from './auth.stub';
+import { authDocument, authLogoutStub, userLoginBody, userLogoutBody } from './auth.stub';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 
 const saltRounds = 10;

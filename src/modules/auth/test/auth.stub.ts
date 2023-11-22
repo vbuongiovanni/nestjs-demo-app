@@ -1,9 +1,5 @@
 import { Auth, User } from '../../../mongodb';
-import {
-  AuthRequestDTO,
-  AuthResponseDTO,
-  AuthLogoutRequestDTO,
-} from '../auth.dto';
+import { AuthRequestDTO, AuthResponseDTO, AuthLogoutRequestDTO } from '../auth.dto';
 
 export const userLoginBody: AuthRequestDTO = {
   email: 'test@email.com',
