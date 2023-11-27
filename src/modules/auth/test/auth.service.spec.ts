@@ -6,6 +6,7 @@ import * as bcrypt from 'bcrypt';
 import { MockAuthModel, MockUserModel, MockModel } from './auth.model';
 import { authDocument, authLogoutStub, userLoginBody, userLogoutBody } from './auth.stub';
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { CustomLogger } from '../../../logger/CustomLogger.service';
 
 const saltRounds = 10;
 
@@ -27,6 +28,7 @@ describe('AuthService', () => {
           provide: getModelToken(Auth.name),
           useValue: MockAuthModel,
         },
+        CustomLogger,
       ],
     }).compile();
 

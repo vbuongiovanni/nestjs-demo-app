@@ -14,9 +14,11 @@ export const updateUserRequestBody: Partial<UpdateUserRequestDTO> = {
 
 export const userDocument: User = { ...createUserRequestBody };
 
+export const user1Id = '655c0a1922b10d6dca4da6c6';
+
 const user1: UserResponseDTO = {
   ...createUserRequestBody,
-  _id: new Types.ObjectId('655c0a1922b10d6dca4da6c6'),
+  _id: new Types.ObjectId(user1Id),
 };
 
 const user2: UserResponseDTO = {

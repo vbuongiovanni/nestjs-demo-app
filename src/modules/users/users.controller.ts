@@ -23,19 +23,19 @@ export class UsersController {
 
   @Get(':id')
   async findUser(@Param('id') id: string): Promise<UserResponseDTO> {
-    const user = await this.usersService.findUser(+id);
+    const user = await this.usersService.findUser(id);
     return plainToInstance(UserResponseDTO, user);
   }
 
   @Patch(':id')
-  async updateUser(@Param('id') id: string, @Body() updateUserBody: UpdateUserRequestDTO): Promise<UserResponseDTO> {
-    const updatedUser = this.usersService.updateUser(+id, updateUserBody);
+  async updateUser(@Param('id') id: string, @Body() updateUserBody: Partial<UpdateUserRequestDTO>): Promise<UserResponseDTO> {
+    const updatedUser = this.usersService.updateUser(id, updateUserBody);
     return plainToInstance(UserResponseDTO, updatedUser);
   }
 
   @Delete(':id')
   async removeUser(@Param('id') id: string): Promise<UserResponseDTO> {
-    const removedUser = await this.usersService.removeUser(+id);
+    const removedUser = await this.usersService.removeUser(id);
     return plainToInstance(UserResponseDTO, removedUser);
   }
 }
