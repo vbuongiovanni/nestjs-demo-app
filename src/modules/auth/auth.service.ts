@@ -5,7 +5,7 @@ import { User, UserDocument, Auth, AuthDocument } from '../../mongodb/schemas';
 import { AuthLogoutRequestDTO, AuthRequestDTO } from './auth.dto';
 import * as bcrypt from 'bcrypt';
 import { v4 as uuid } from 'uuid';
-import { CustomLogger } from '../../logger/CustomLogger.service';
+import { CustomLogger } from '../../logger/custom-logger.service';
 
 @Injectable()
 export class AuthService {

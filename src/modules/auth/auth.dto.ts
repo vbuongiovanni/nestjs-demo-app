@@ -1,6 +1,5 @@
-import { Transform } from 'class-transformer';
+import { Expose } from 'class-transformer';
 import { IsEmail, IsNotEmpty } from 'class-validator';
-import { Types } from 'mongoose';
 
 export class AuthRequestDTO {
   @IsNotEmpty()
@@ -13,15 +12,19 @@ export class AuthRequestDTO {
 
 export class AuthResponseDTO {
   @IsNotEmpty()
+  @Expose()
   _id: string;
 
   @IsNotEmpty()
+  @Expose()
   userId: string;
 
   @IsNotEmpty()
+  @Expose()
   token: string;
 
   @IsNotEmpty()
+  @Expose()
   expiration: Date;
 }
 

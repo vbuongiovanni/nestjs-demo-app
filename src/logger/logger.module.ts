@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { CustomLogger } from './CustomLogger.service';
+import { CustomLogger } from './custom-logger.service';
 
 @Module({
   providers: [CustomLogger],

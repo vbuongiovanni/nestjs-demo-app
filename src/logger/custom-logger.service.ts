@@ -7,13 +7,19 @@ const consoleTransport = new transports.Console({
   silent: false,
 });
 
-export const logger = createLogger({
+const logger = createLogger({
   transports: [consoleTransport],
 });
 
-@Injectable({ scope: Scope.TRANSIENT })
+@Injectable()
 export class CustomLogger extends ConsoleLogger {
   logger(message: string, ex: Error | null = null) {
     logger.error(message, ex);
+  }
+  log(message: string) {
+    logger.info(message);
+  }
+  error(message: string) {
+    logger.error(message, 'ex');
   }
 }

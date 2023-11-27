@@ -12,7 +12,7 @@ export class AuthController {
   @Post('login')
   async login(@Body() body: AuthRequestDTO): Promise<AuthResponseDTO> {
     const authResponse = await this.authService.login(body);
-    return plainToInstance(AuthResponseDTO, authResponse);
+    return plainToInstance(AuthResponseDTO, authResponse, { excludeExtraneousValues: true });
   }
 
   @Post('logout')

@@ -9,7 +9,7 @@ import { LoggerModule } from './logger/logger.module';
 @Module({
   imports: [
     CommonModule,
-    UsersModule,
+    LoggerModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
@@ -18,7 +18,7 @@ import { LoggerModule } from './logger/logger.module';
       inject: [ConfigService],
     }),
     AuthModule,
-    LoggerModule,
+    UsersModule,
   ],
   controllers: [],
   providers: [],

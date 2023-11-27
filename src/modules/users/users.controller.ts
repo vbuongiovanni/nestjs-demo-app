@@ -12,30 +12,31 @@ export class UsersController {
   @UsePipes(HashPasswordPipe)
   async createUser(@Body() createUserBody: CreateUserRequestDTO): Promise<UserResponseDTO> {
     const newUser = await this.usersService.createUser(createUserBody);
-    return plainToInstance(UserResponseDTO, newUser);
+    const convertedNewUser = plainToInstance(UserResponseDTO, newUser, { excludeExtraneousValues: true });
+    return convertedNewUser;
   }
 
   @Get()
   async findAllUsers(): Promise<UserResponseDTO[]> {
     const users = await this.usersService.findAllUsers();
-    return plainToInstance(UserResponseDTO, users);
+    return plainToInstance(UserResponseDTO, users, { excludeExtraneousValues: true });
   }
 
   @Get(':id')
   async findUser(@Param('id') id: string): Promise<UserResponseDTO> {
     const user = await this.usersService.findUser(id);
-    return plainToInstance(UserResponseDTO, user);
+    return plainToInstance(UserResponseDTO, user, { excludeExtraneousValues: true });
   }
 
   @Patch(':id')
   async updateUser(@Param('id') id: string, @Body() updateUserBody: Partial<UpdateUserRequestDTO>): Promise<UserResponseDTO> {
     const updatedUser = this.usersService.updateUser(id, updateUserBody);
-    return plainToInstance(UserResponseDTO, updatedUser);
+    return plainToInstance(UserResponseDTO, updatedUser, { excludeExtraneousValues: true });
   }
 
   @Delete(':id')
   async removeUser(@Param('id') id: string): Promise<UserResponseDTO> {
     const removedUser = await this.usersService.removeUser(id);
-    return plainToInstance(UserResponseDTO, removedUser);
+    return plainToInstance(UserResponseDTO, removedUser, { excludeExtraneousValues: true });
   }
 }

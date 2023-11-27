@@ -1,3 +1,4 @@
+import { Expose } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 import { Types } from 'mongoose';
 
@@ -30,12 +31,15 @@ export class UpdateUserRequestDTO {
 
 export class UserResponseDTO {
   @IsNotEmpty()
+  @Expose()
   _id: Types.ObjectId;
 
   @IsNotEmpty()
+  @Expose()
   name: string;
 
   @IsNotEmpty()
   @IsEmail()
+  @Expose()
   email: string;
 }
