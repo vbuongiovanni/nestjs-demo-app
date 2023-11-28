@@ -12,7 +12,7 @@ import {
   updateUserStub,
   user1Id,
 } from './users.stub';
-import { UserResponseDTO } from '../user.dto';
+import { UserDocument } from '../../../mongodb';
 
 jest.mock('../users.service');
 
@@ -34,7 +34,7 @@ describe('UsersController', () => {
 
   describe('createUser', () => {
     describe('when createUser is called', () => {
-      let newUserResponse: UserResponseDTO;
+      let newUserResponse: UserDocument;
       beforeEach(async () => {
         newUserResponse = await mockUserService.createUser(createUserRequestBody);
       });
@@ -51,7 +51,7 @@ describe('UsersController', () => {
 
   describe('findAllUsers', () => {
     describe('when findAllUsers is called', () => {
-      let findAllUsersResponse: UserResponseDTO[] = [];
+      let findAllUsersResponse: UserDocument[] = [];
       beforeEach(async () => {
         findAllUsersResponse = await mockUserService.findAllUsers();
       });
@@ -68,7 +68,7 @@ describe('UsersController', () => {
 
   describe('findUser', () => {
     describe('when findUser is called', () => {
-      let findUserResponse: UserResponseDTO;
+      let findUserResponse: UserDocument;
       beforeEach(async () => {
         findUserResponse = await mockUserService.findUser(user1Id);
       });
@@ -85,7 +85,7 @@ describe('UsersController', () => {
 
   describe('updateUser', () => {
     describe('when updateUser is called', () => {
-      let updateUserResponse: UserResponseDTO;
+      let updateUserResponse: UserDocument;
       beforeEach(async () => {
         updateUserResponse = await mockUserService.updateUser(user1Id, updateUserRequestBody);
       });
@@ -102,7 +102,7 @@ describe('UsersController', () => {
 
   describe('removeUser', () => {
     describe('when removeUser is called', () => {
-      let removeUserResponse: UserResponseDTO;
+      let removeUserResponse: UserDocument;
       beforeEach(async () => {
         removeUserResponse = await mockUserService.removeUser(user1Id);
       });

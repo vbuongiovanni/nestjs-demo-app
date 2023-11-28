@@ -1,6 +1,6 @@
-import { Expose } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
-import { Types } from 'mongoose';
+import { ConvertIdType } from '../../common/decorators/convert-id-type.decorator';
 
 export class CreateUserRequestDTO {
   @IsNotEmpty()
@@ -32,7 +32,8 @@ export class UpdateUserRequestDTO {
 export class UserResponseDTO {
   @IsNotEmpty()
   @Expose()
-  _id: Types.ObjectId;
+  @ConvertIdType('string')
+  _id: string;
 
   @IsNotEmpty()
   @Expose()
