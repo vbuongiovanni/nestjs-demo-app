@@ -12,7 +12,8 @@ import {
   updateUserStub,
   user1Id,
 } from './users.stub';
-import { UserDocument } from '../../../mongodb';
+import { plainToInstance } from 'class-transformer';
+import { UserResponseDTO } from '../user.dto';
 
 jest.mock('../users.service');
 
@@ -34,9 +35,9 @@ describe('UsersController', () => {
 
   describe('createUser', () => {
     describe('when createUser is called', () => {
-      let newUserResponse: UserDocument;
+      let newUserResponse: UserResponseDTO;
       beforeEach(async () => {
-        newUserResponse = await mockUserService.createUser(createUserRequestBody);
+        newUserResponse = await usersController.createUser(createUserRequestBody);
       });
 
       it('should call the createUser method of the UsersService', async () => {
@@ -44,16 +45,17 @@ describe('UsersController', () => {
       });
 
       it('should return the createUser method of the UsersService', async () => {
-        expect(newUserResponse).toEqual(createUserStub());
+        const expectedUserResponseDto = plainToInstance(UserResponseDTO, createUserStub(), { excludeExtraneousValues: true });
+        expect(newUserResponse).toEqual(expectedUserResponseDto);
       });
     });
   });
 
   describe('findAllUsers', () => {
     describe('when findAllUsers is called', () => {
-      let findAllUsersResponse: UserDocument[] = [];
+      let findAllUsersResponse: UserResponseDTO[] = [];
       beforeEach(async () => {
-        findAllUsersResponse = await mockUserService.findAllUsers();
+        findAllUsersResponse = await usersController.findAllUsers();
       });
 
       it('should call the findAllUsers method of the UsersService', async () => {
@@ -61,16 +63,17 @@ describe('UsersController', () => {
       });
 
       it('should return an array of all users', async () => {
-        expect(findAllUsersResponse).toEqual(findAllUsersStub());
+        const expectedUserResponseDto = plainToInstance(UserResponseDTO, findAllUsersStub(), { excludeExtraneousValues: true });
+        expect(findAllUsersResponse).toEqual(expectedUserResponseDto);
       });
     });
   });
 
   describe('findUser', () => {
     describe('when findUser is called', () => {
-      let findUserResponse: UserDocument;
+      let findUserResponse: UserResponseDTO;
       beforeEach(async () => {
-        findUserResponse = await mockUserService.findUser(user1Id);
+        findUserResponse = await usersController.findUser(user1Id);
       });
 
       it('should call the findUser method of the UsersService', async () => {
@@ -78,16 +81,17 @@ describe('UsersController', () => {
       });
 
       it('should return the found user', async () => {
-        expect(findUserResponse).toEqual(findUserStub());
+        const expectedUserResponseDto = plainToInstance(UserResponseDTO, findUserStub(), { excludeExtraneousValues: true });
+        expect(findUserResponse).toEqual(expectedUserResponseDto);
       });
     });
   });
 
   describe('updateUser', () => {
     describe('when updateUser is called', () => {
-      let updateUserResponse: UserDocument;
+      let updateUserResponse: UserResponseDTO;
       beforeEach(async () => {
-        updateUserResponse = await mockUserService.updateUser(user1Id, updateUserRequestBody);
+        updateUserResponse = await usersController.updateUser(user1Id, updateUserRequestBody);
       });
 
       it('should call the updateUser method of the UsersService', async () => {
@@ -95,16 +99,17 @@ describe('UsersController', () => {
       });
 
       it('should return the updatedUser user', async () => {
-        expect(updateUserResponse).toEqual(updateUserStub());
+        const expectedUserResponseDto = plainToInstance(UserResponseDTO, updateUserStub(), { excludeExtraneousValues: true });
+        expect(updateUserResponse).toEqual(expectedUserResponseDto);
       });
     });
   });
 
   describe('removeUser', () => {
     describe('when removeUser is called', () => {
-      let removeUserResponse: UserDocument;
+      let removeUserResponse: UserResponseDTO;
       beforeEach(async () => {
-        removeUserResponse = await mockUserService.removeUser(user1Id);
+        removeUserResponse = await usersController.removeUser(user1Id);
       });
 
       it('should call the removeUser method of the UsersService', async () => {
@@ -112,7 +117,8 @@ describe('UsersController', () => {
       });
 
       it('should return the removed user', async () => {
-        expect(removeUserResponse).toEqual(removeUserStub());
+        const expectedUserResponseDto = plainToInstance(UserResponseDTO, removeUserStub(), { excludeExtraneousValues: true });
+        expect(removeUserResponse).toEqual(expectedUserResponseDto);
       });
     });
   });
