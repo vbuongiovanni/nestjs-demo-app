@@ -26,46 +26,50 @@ describe('AuthController', () => {
   });
 
   describe('login', () => {
-    describe('when login is called with valid credentials', () => {
-      let authResponse: AuthResponseDTO;
+    describe('Given a user that has a valid account', () => {
+      describe('when the user attempts to logs in with valid credentials', () => {
+        let authResponse: AuthResponseDTO;
 
-      const loginBody: AuthRequestDTO = {
-        email: 'someone@Somewhere.com',
-        password: 'password',
-      };
+        const loginBody: AuthRequestDTO = {
+          email: 'someone@Somewhere.com',
+          password: 'password',
+        };
 
-      beforeEach(async () => {
-        authResponse = await authController.login(loginBody);
-      });
+        beforeEach(async () => {
+          authResponse = await authController.login(loginBody);
+        });
 
-      it('should call the login method of the AuthService', async () => {
-        expect(mockAuthService.login).toHaveBeenCalledWith(loginBody);
-      });
+        it('should call the login method of the AuthService', async () => {
+          expect(mockAuthService.login).toHaveBeenCalledWith(loginBody);
+        });
 
-      it('should return the login method of the AuthService', async () => {
-        expect(authResponse).toEqual(authLoginStub());
+        it('should return the login method of the AuthService', async () => {
+          expect(authResponse).toEqual(authLoginStub());
+        });
       });
     });
   });
 
   describe('logout', () => {
-    describe('when logout is called with valid body containing a userid', () => {
-      let logoutResponse: Record<string, never>;
+    describe('Given a user that has a valid account and has logged in', () => {
+      describe('When the user logs out with a valid body containing a valid userid', () => {
+        let logoutResponse: Record<string, never>;
 
-      const logoutBody = {
-        userId: 'someUserId',
-      };
+        const logoutBody = {
+          userId: 'someUserId',
+        };
 
-      beforeEach(async () => {
-        logoutResponse = await authController.logout(logoutBody);
-      });
+        beforeEach(async () => {
+          logoutResponse = await authController.logout(logoutBody);
+        });
 
-      it('should call the logout method of the AuthService', async () => {
-        expect(mockAuthService.logout).toHaveBeenCalledWith(logoutBody);
-      });
+        it('should call the logout method of the AuthService', async () => {
+          expect(mockAuthService.logout).toHaveBeenCalledWith(logoutBody);
+        });
 
-      it('should return an empty object', async () => {
-        expect(logoutResponse).toEqual(authLogoutStub());
+        it('should return an empty object', async () => {
+          expect(logoutResponse).toEqual(authLogoutStub());
+        });
       });
     });
   });

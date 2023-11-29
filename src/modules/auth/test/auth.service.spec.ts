@@ -42,80 +42,84 @@ describe('AuthService', () => {
   });
 
   describe('login', () => {
-    describe('When a user logs for the first time with a correct password', () => {
-      it('should return an auth object', async () => {
-        mockUserModel.findOne.mockResolvedValueOnce(mockFoundUser);
-        mockAuthModel.findOne.mockResolvedValueOnce(null);
-        const auth = await authService.login(userLoginBody);
-        expect(auth).toEqual(authDocument());
+    describe('Given a user with an existing account', () => {
+      describe('When the user logs in for the first time with a correct password', () => {
+        it('then it should return an auth object', async () => {
+          mockUserModel.findOne.mockResolvedValueOnce(mockFoundUser);
+          mockAuthModel.findOne.mockResolvedValueOnce(null);
+          const auth = await authService.login(userLoginBody);
+          expect(auth).toEqual(authDocument());
+        });
       });
-    });
 
-    describe('When a user logs for the the second or more time with a correct password', () => {
-      it('should return an auth object', async () => {
-        mockUserModel.findOne.mockResolvedValueOnce(mockFoundUser);
-        mockAuthModel.findOne.mockResolvedValueOnce(authDocument());
-        const auth = await authService.login(userLoginBody);
-        expect(auth).toEqual(authDocument());
+      describe('When the user logs in for the second or more time with a correct password', () => {
+        it('then it should return an auth object', async () => {
+          mockUserModel.findOne.mockResolvedValueOnce(mockFoundUser);
+          mockAuthModel.findOne.mockResolvedValueOnce(authDocument());
+          const auth = await authService.login(userLoginBody);
+          expect(auth).toEqual(authDocument());
+        });
       });
-    });
 
-    describe('When a user attempts to login with an incorrect password', () => {
-      it('should throw the "UnauthorizedException" with custom message.', async () => {
-        const incorrectUserLogin = {
-          ...userLoginBody,
-          password: 'something else',
-        };
+      describe('When the user attempts to login with an incorrect password', () => {
+        it('then it should throw the "UnauthorizedException" with custom message.', async () => {
+          const incorrectUserLogin = {
+            ...userLoginBody,
+            password: 'something else',
+          };
 
-        mockUserModel.findOne.mockResolvedValueOnce(mockFoundUser);
-        try {
-          await authService.login(incorrectUserLogin);
-          expect(false).toBeTruthy();
-        } catch (ex) {
-          expect(ex).toBeInstanceOf(UnauthorizedException);
-          expect(ex.message).toEqual('Invalid user or incorrect credentials.');
-        }
+          mockUserModel.findOne.mockResolvedValueOnce(mockFoundUser);
+          try {
+            await authService.login(incorrectUserLogin);
+            expect(false).toBeTruthy();
+          } catch (ex) {
+            expect(ex).toBeInstanceOf(UnauthorizedException);
+            expect(ex.message).toEqual('Invalid user or incorrect credentials.');
+          }
+        });
       });
-    });
 
-    describe('When a user attempts to login without an email', () => {
-      it('should throw the "UnauthorizedException" with custom message.', async () => {
-        const incorrectUserLogin = {
-          ...userLoginBody,
-          email: '',
-        };
+      describe('When the user attempts to login without an email', () => {
+        it('then it should throw the "UnauthorizedException" with custom message.', async () => {
+          const incorrectUserLogin = {
+            ...userLoginBody,
+            email: '',
+          };
 
-        mockUserModel.findOne.mockResolvedValueOnce(null);
-        try {
-          await authService.login(incorrectUserLogin);
-          expect(false).toBeTruthy();
-        } catch (ex) {
-          expect(ex).toBeInstanceOf(UnauthorizedException);
-          expect(ex.message).toEqual('Invalid user or incorrect credentials.');
-        }
+          mockUserModel.findOne.mockResolvedValueOnce(null);
+          try {
+            await authService.login(incorrectUserLogin);
+            expect(false).toBeTruthy();
+          } catch (ex) {
+            expect(ex).toBeInstanceOf(UnauthorizedException);
+            expect(ex.message).toEqual('Invalid user or incorrect credentials.');
+          }
+        });
       });
     });
   });
 
   describe('logout', () => {
-    describe('When a user attempts to log out and is found within the auth collection', () => {
-      it('should return an empty object', async () => {
-        mockAuthModel.findOneAndDelete.mockResolvedValueOnce(authDocument());
-        const serviceValue = await authService.logout(userLogoutBody);
-        expect(serviceValue).toEqual(authLogoutStub());
+    describe('Given a user with an existing account', () => {
+      describe('When a user attempts to log out from a valid session', () => {
+        it('then it should return an empty object', async () => {
+          mockAuthModel.findOneAndDelete.mockResolvedValueOnce(authDocument());
+          const serviceValue = await authService.logout(userLogoutBody);
+          expect(serviceValue).toEqual(authLogoutStub());
+        });
       });
-    });
 
-    describe('When a user attempts to log out and is not found within the auth collection', () => {
-      it('should throw a "BadRequestException"', async () => {
-        mockAuthModel.findOneAndDelete.mockResolvedValueOnce(null);
-        try {
-          await authService.logout(userLogoutBody);
-          expect(false).toBeTruthy();
-        } catch (ex) {
-          expect(ex).toBeInstanceOf(BadRequestException);
-          expect(ex.message).toEqual('Invalid user.');
-        }
+      describe('When a user attempts to log out from an invalid session', () => {
+        it('then it should throw a "BadRequestException"', async () => {
+          mockAuthModel.findOneAndDelete.mockResolvedValueOnce(null);
+          try {
+            await authService.logout(userLogoutBody);
+            expect(false).toBeTruthy();
+          } catch (ex) {
+            expect(ex).toBeInstanceOf(BadRequestException);
+            expect(ex.message).toEqual('Invalid user.');
+          }
+        });
       });
     });
   });
