@@ -1,0 +1,10 @@
+{
+  "$schema": "../node_modules/@angular-devkit/schematics/collection-schema.json",
+  "schematics": {
+    "controller-spec": {
+      "description": "Generates boilerplate code for controller spec, including all support mock/stub files.",
+      "factory": "./controller-spec/index#generate",
+      "schema": "./controller-spec/schema.json"
+    }
+  }
+}
