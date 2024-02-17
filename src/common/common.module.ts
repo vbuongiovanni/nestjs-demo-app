@@ -9,7 +9,6 @@ import { ApplicationValidationPipe } from './pipes';
 import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { Auth, AuthSchema, RequestLogger, RequestLoggerSchema } from '../mongodb';
 import { MongooseModule } from '@nestjs/mongoose';
-
 @Module({
   imports: [
     ConfigModule.forRoot({
