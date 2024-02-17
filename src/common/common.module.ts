@@ -9,6 +9,7 @@ import { ApplicationValidationPipe } from './pipes';
 import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { Auth, AuthSchema, RequestLogger, RequestLoggerSchema } from '../mongodb';
 import { MongooseModule } from '@nestjs/mongoose';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -18,6 +19,11 @@ import { MongooseModule } from '@nestjs/mongoose';
         AUTH_KEY: Joi.string().required(),
         MONGO_URI: Joi.string().required(),
         SALT_ROUNDS: Joi.number().required(),
+        // jwtSecret: Joi.string().required(),
+        // jwtAudience: Joi.string().required(),
+        // jwtPrincipal: Joi.string().required(),
+        // jwtTimeToLive: Joi.number().required(),
+        // jwtRefreshTimeToLive: Joi.number().required(),
       }),
       load: [appConfig],
     }),

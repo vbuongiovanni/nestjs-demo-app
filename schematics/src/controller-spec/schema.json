@@ -19,7 +19,7 @@
         "$source": "argv",
         "index": 0
       },
-      "x-prompt": "Where would you like to create the controller spec? Enter as a relative path from the project root, e.g. './src/modules/users'."
+      "x-prompt": "Directory name of where you would like to create the scaffolding (relative to './src/modules/'). Leave blank if same as module name."
     }
   },
   "required": ["name", "path"]

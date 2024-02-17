@@ -9,18 +9,26 @@ export function generate(options: ControllerSpecOptions): Rule {
   return (_tree: Tree, _context: SchematicContext) => {
     let { path, name } = options;
 
-    if (!path.endsWith('/')) {
-      path = `${path}/`;
-    }
-    if (!path.startsWith('./')) {
-      path = `./${path}`;
-    }
-
-    if (name.endsWith('s')) {
-      name = name.replace(/s$/, '');
+    if (path) {
+      if (!path.endsWith('/')) {
+        path = `${path}/`;
+      }
+      path = path.replace(/^\.\//, '');
+    } else {
+      path = name;
     }
 
-    const validatedOptions = { ...options, name: name, path: path };
+    path = `./src/modules/${path}`;
+
+    let singularName = '';
+
+    if (name.endsWith('ies')) {
+      singularName = name.replace(/ies$/, 'y');
+    } else {
+      singularName = name.replace(/s$/, '');
+    }
+
+    const validatedOptions = { ...options, name: name.toLowerCase(), path, singularName: singularName.toLowerCase() };
 
     const templateSource = apply(url('./files/tests'), [template({ ...validatedOptions, ...strings }), move(`${path}/tests`)]);
     const mockTemplateSource = apply(url('./files/mocks'), [template({ ...validatedOptions, ...strings }), move(`${path}/__mocks__`)]);

@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { plainToInstance } from 'class-transformer';
 import { CatsController } from '../cats.controller';
 import { CatsService } from '../cats.service';
-import { CatsResponseDto } from '../cats.dto';
+import { CatResponseDto } from '../cats.dto';
 import {
   createCatStub,
   getCatStub,
@@ -37,7 +37,7 @@ describe('CatController', () => {
   describe('createCat', () => {
     describe('Given an authenticated user', () => {
       describe('When the user attempts to create a Cat', () => {
-        let response: CatsResponseDto;
+        let response: CatResponseDto;
         beforeEach(async () => {
           response = await controller.createCat(createCatRequestBody);
         });
@@ -46,8 +46,8 @@ describe('CatController', () => {
           expect(mockService.createCat).toHaveBeenCalledWith(createCatRequestBody);
         });
 
-        it('and it should return a cat in the shape of a DTO transformed object.', () => {
-          const expectedResponse = plainToInstance(CatsResponseDto, createCatStub(), { excludeExtraneousValues: true });
+        it('and it should return a cats in the shape of a DTO transformed object.', () => {
+          const expectedResponse = plainToInstance(CatResponseDto, createCatStub(), { excludeExtraneousValues: true });
           expect(response).toEqual(expectedResponse);
         });
       });
@@ -57,7 +57,7 @@ describe('CatController', () => {
   describe('getCats', () => {
     describe('Given an authenticated user', () => {
       describe('When the user attempts to fetch all Cats', () => {
-        let response: CatsResponseDto[];
+        let response: CatResponseDto[];
         beforeEach(async () => {
           response = await controller.getCats();
         });
@@ -67,7 +67,7 @@ describe('CatController', () => {
         });
 
         it('and it should return all cats in the shape of a DTO transformed object.', () => {
-          const expectedResponse = plainToInstance(CatsResponseDto, getCatsStub(), { excludeExtraneousValues: true });
+          const expectedResponse = plainToInstance(CatResponseDto, getCatsStub(), { excludeExtraneousValues: true });
           expect(response).toEqual(expectedResponse);
         });
       });
@@ -77,7 +77,7 @@ describe('CatController', () => {
   describe('getCat', () => {
     describe('Given an authenticated user', () => {
       describe('When the user attempts to fetch a single Cat', () => {
-        let response: CatsResponseDto;
+        let response: CatResponseDto;
         beforeEach(async () => {
           response = await controller.getCat(testCat1Id);
         });
@@ -86,8 +86,8 @@ describe('CatController', () => {
           expect(mockService.getCat).toHaveBeenCalledWith(testCat1Id);
         });
 
-        it('and it should return a cat in the shape of a DTO transformed object.', () => {
-          const expectedResponse = plainToInstance(CatsResponseDto, getCatStub(), { excludeExtraneousValues: true });
+        it('and it should return a cats in the shape of a DTO transformed object.', () => {
+          const expectedResponse = plainToInstance(CatResponseDto, getCatStub(), { excludeExtraneousValues: true });
           expect(response).toEqual(expectedResponse);
         });
       });
@@ -97,7 +97,7 @@ describe('CatController', () => {
   describe('updateCat', () => {
     describe('Given an authenticated user', () => {
       describe('When the user attempts to update a Cat', () => {
-        let response: CatsResponseDto;
+        let response: CatResponseDto;
         beforeEach(async () => {
           response = await controller.updateCat(testCat1Id, updateCatRequestBody);
         });
@@ -106,8 +106,8 @@ describe('CatController', () => {
           expect(mockService.updateCat).toHaveBeenCalledWith(testCat1Id, updateCatRequestBody);
         });
 
-        it('and it should return a cat in the shape of a DTO transformed object.', () => {
-          const expectedResponse = plainToInstance(CatsResponseDto, updateCatStub(), { excludeExtraneousValues: true });
+        it('and it should return a cats in the shape of a DTO transformed object.', () => {
+          const expectedResponse = plainToInstance(CatResponseDto, updateCatStub(), { excludeExtraneousValues: true });
           expect(response).toEqual(expectedResponse);
         });
       });
@@ -117,7 +117,7 @@ describe('CatController', () => {
   describe('deleteCat', () => {
     describe('Given an authenticated user', () => {
       describe('When the user attempts to fetch a single Cat', () => {
-        let response: CatsResponseDto;
+        let response: CatResponseDto;
         beforeEach(async () => {
           response = await controller.deleteCat(testCat1Id);
         });
@@ -126,8 +126,8 @@ describe('CatController', () => {
           expect(mockService.deleteCat).toHaveBeenCalledWith(testCat1Id);
         });
 
-        it('and it should return a cat in the shape of a DTO transformed object.', () => {
-          const expectedResponse = plainToInstance(CatsResponseDto, deleteCatStub(), { excludeExtraneousValues: true });
+        it('and it should return a cats in the shape of a DTO transformed object.', () => {
+          const expectedResponse = plainToInstance(CatResponseDto, deleteCatStub(), { excludeExtraneousValues: true });
           expect(response).toEqual(expectedResponse);
         });
       });
