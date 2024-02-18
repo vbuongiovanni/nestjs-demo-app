@@ -8,6 +8,8 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { CatsModule } from './modules/cats/cats.module';
 import { IamModule } from './modules/iam/iam.module';
 import { dbConfig } from './common/config/db.config';
+import { CompaniesModule } from './modules/companies/companies.module';
+import { RolesModule } from './modules/roles/roles.module';
 
 // TO DO :
 // Implement circuit breaker
@@ -29,6 +31,8 @@ import { dbConfig } from './common/config/db.config';
     IamModule,
     UsersModule,
     CatsModule,
+    CompaniesModule,
+    RolesModule,
   ],
   controllers: [],
   providers: [],

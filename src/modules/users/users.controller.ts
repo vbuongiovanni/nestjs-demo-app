@@ -3,6 +3,8 @@ import { HashPasswordPipe } from '../../common/pipes/hash-password.pipe';
 import { UsersService } from './users.service';
 import { CreateUserRequestDTO, UpdateUserRequestDTO, UserResponseDTO } from './user.dto';
 import { plainToInstance } from 'class-transformer';
+import { Types } from 'mongoose';
+import { ToObjectIdPipe } from 'src/common/pipes';
 
 @Controller('users')
 export class UsersController {
@@ -12,8 +14,7 @@ export class UsersController {
   @UsePipes(HashPasswordPipe)
   async createUser(@Body() createUserBody: CreateUserRequestDTO): Promise<UserResponseDTO> {
     const newUser = await this.usersService.createUser(createUserBody);
-    const convertedNewUser = plainToInstance(UserResponseDTO, newUser, { excludeExtraneousValues: true });
-    return convertedNewUser;
+    return plainToInstance(UserResponseDTO, newUser, { excludeExtraneousValues: true });
   }
 
   @Get()
@@ -23,19 +24,22 @@ export class UsersController {
   }
 
   @Get(':id')
-  async findUser(@Param('id') id: string): Promise<UserResponseDTO> {
+  async findUser(@Param('id', ToObjectIdPipe) id: Types.ObjectId): Promise<UserResponseDTO> {
     const user = await this.usersService.findUser(id);
     return plainToInstance(UserResponseDTO, user, { excludeExtraneousValues: true });
   }
 
   @Patch(':id')
-  async updateUser(@Param('id') id: string, @Body() updateUserBody: Partial<UpdateUserRequestDTO>): Promise<UserResponseDTO> {
+  async updateUser(
+    @Param('id', ToObjectIdPipe) id: Types.ObjectId,
+    @Body() updateUserBody: Partial<UpdateUserRequestDTO>,
+  ): Promise<UserResponseDTO> {
     const updatedUser = this.usersService.updateUser(id, updateUserBody);
     return plainToInstance(UserResponseDTO, updatedUser, { excludeExtraneousValues: true });
   }
 
   @Delete(':id')
-  async removeUser(@Param('id') id: string): Promise<UserResponseDTO> {
+  async removeUser(@Param('id', ToObjectIdPipe) id: Types.ObjectId): Promise<UserResponseDTO> {
     const removedUser = await this.usersService.removeUser(id);
     return plainToInstance(UserResponseDTO, removedUser, { excludeExtraneousValues: true });
   }

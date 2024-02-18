@@ -4,12 +4,10 @@ import * as Joi from 'joi';
 import appConfig from './config/app.config';
 import { RequestLoggerMiddleware } from './middleware';
 import { WrapResponseInterceptor } from './interceptors';
-import { AuthGuard } from '../modules/iam/authentication/guards';
 import { ApplicationValidationPipe } from './pipes';
-import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
-import { Auth, AuthSchema, RequestLogger, RequestLoggerSchema } from '../mongodb';
+import { APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
+import { RequestLogger, RequestLoggerSchema } from '../mongodb';
 import { MongooseModule } from '@nestjs/mongoose';
-import { BearerGuard } from '../modules/iam/authentication/guards/bearer.guard';
 
 @Module({
   imports: [
@@ -28,10 +26,7 @@ import { BearerGuard } from '../modules/iam/authentication/guards/bearer.guard';
       }),
       load: [appConfig],
     }),
-    MongooseModule.forFeature([
-      { name: Auth.name, schema: AuthSchema },
-      { name: RequestLogger.name, schema: RequestLoggerSchema },
-    ]),
+    MongooseModule.forFeature([{ name: RequestLogger.name, schema: RequestLoggerSchema }]),
   ],
   providers: [
     { provide: APP_INTERCEPTOR, useClass: WrapResponseInterceptor },

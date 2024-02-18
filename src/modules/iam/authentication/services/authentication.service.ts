@@ -1,7 +1,7 @@
 import { BadRequestException, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { User, UserDocument, Auth, AuthDocument } from '../../../../mongodb';
+import { User, UserDocument } from '../../../../mongodb';
 import { AuthRequestDTO, RefreshTokenRequestDto, RegisterRequestDTO } from '../authentication.dto';
 import { HashingService } from '../hashing';
 import jwtConfig from '../../../../common/config/jwt.config';
