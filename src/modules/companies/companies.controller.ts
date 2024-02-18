@@ -2,8 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { CompaniesService } from './companies.service';
 import { CreateCompanyRequestDto, UpdateCompanyRequestDto, CompanyResponseDto } from './companies.dto';
 import { plainToInstance } from 'class-transformer';
-import { ToObjectIdPipe } from 'src/common/pipes';
 import { Types } from 'mongoose';
+import { ObjectIdParam } from 'src/common/decorators';
 
 @Controller('companies')
 export class CompaniesController {
@@ -22,14 +22,14 @@ export class CompaniesController {
   }
 
   @Get(':id')
-  async findCompany(@Param('id', ToObjectIdPipe) id: Types.ObjectId): Promise<CompanyResponseDto> {
+  async findCompany(@ObjectIdParam('id') id: Types.ObjectId): Promise<CompanyResponseDto> {
     const company = await this.companiesService.findCompany(id);
     return plainToInstance(CompanyResponseDto, company, { excludeExtraneousValues: true });
   }
 
   @Patch(':id')
   async updateCompany(
-    @Param('id', ToObjectIdPipe) id: Types.ObjectId,
+    @ObjectIdParam('id') id: Types.ObjectId,
     @Body() updateCompanyDto: UpdateCompanyRequestDto,
   ): Promise<CompanyResponseDto> {
     const updatedCompany = await this.companiesService.updateCompany(id, updateCompanyDto);
@@ -37,7 +37,7 @@ export class CompaniesController {
   }
 
   @Delete(':id')
-  async removeCompany(@Param('id', ToObjectIdPipe) id: Types.ObjectId): Promise<CompanyResponseDto> {
+  async removeCompany(@ObjectIdParam('id') id: Types.ObjectId): Promise<CompanyResponseDto> {
     const removedCompany = await this.companiesService.removeCompany(id);
     return plainToInstance(CompanyResponseDto, removedCompany, { excludeExtraneousValues: true });
   }

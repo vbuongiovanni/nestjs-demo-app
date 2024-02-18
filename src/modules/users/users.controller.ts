@@ -4,7 +4,7 @@ import { UsersService } from './users.service';
 import { CreateUserRequestDTO, UpdateUserRequestDTO, UserResponseDTO } from './user.dto';
 import { plainToInstance } from 'class-transformer';
 import { Types } from 'mongoose';
-import { ToObjectIdPipe } from 'src/common/pipes';
+import { ObjectIdParam } from 'src/common/decorators';
 
 @Controller('users')
 export class UsersController {
@@ -24,14 +24,14 @@ export class UsersController {
   }
 
   @Get(':id')
-  async findUser(@Param('id', ToObjectIdPipe) id: Types.ObjectId): Promise<UserResponseDTO> {
+  async findUser(@ObjectIdParam('id') id: Types.ObjectId): Promise<UserResponseDTO> {
     const user = await this.usersService.findUser(id);
     return plainToInstance(UserResponseDTO, user, { excludeExtraneousValues: true });
   }
 
   @Patch(':id')
   async updateUser(
-    @Param('id', ToObjectIdPipe) id: Types.ObjectId,
+    @ObjectIdParam('id') id: Types.ObjectId,
     @Body() updateUserBody: Partial<UpdateUserRequestDTO>,
   ): Promise<UserResponseDTO> {
     const updatedUser = this.usersService.updateUser(id, updateUserBody);
@@ -39,7 +39,7 @@ export class UsersController {
   }
 
   @Delete(':id')
-  async removeUser(@Param('id', ToObjectIdPipe) id: Types.ObjectId): Promise<UserResponseDTO> {
+  async removeUser(@ObjectIdParam('id') id: Types.ObjectId): Promise<UserResponseDTO> {
     const removedUser = await this.usersService.removeUser(id);
     return plainToInstance(UserResponseDTO, removedUser, { excludeExtraneousValues: true });
   }

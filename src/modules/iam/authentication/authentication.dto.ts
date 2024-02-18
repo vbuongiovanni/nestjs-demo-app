@@ -24,6 +24,10 @@ export class RegisterResponseDTO {
 
   @IsNotEmpty()
   @Expose()
+  companyId: string;
+
+  @IsNotEmpty()
+  @Expose()
   firstName: string;
 
   @IsNotEmpty()

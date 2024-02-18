@@ -10,9 +10,9 @@ import { CustomLogger } from '../../../../logger/custom-logger.service';
 import { JwtService } from '@nestjs/jwt';
 import { IUser } from 'src/common/types/user';
 import { randomUUID } from 'crypto';
-import { custom } from 'joi';
 import { DuplicateRecordException, InvalidatedRefreshTokenException } from 'src/common/exceptions';
 import { RefreshTokenService } from './refresh-token.service';
+import { Types } from 'mongoose';
 
 @Injectable()
 export class AuthService {
@@ -70,9 +70,9 @@ export class AuthService {
     }
   }
 
-  async register(registerBody: RegisterRequestDTO) {
+  async register(companyId: Types.ObjectId, registerBody: RegisterRequestDTO) {
     const hashedPassword = await this.hashingService.hash(registerBody.password);
-    const newUser = new this.userModel({ ...registerBody, password: hashedPassword });
+    const newUser = new this.userModel({ ...registerBody, password: hashedPassword, companyId });
     return newUser
       .save()
       .then((user) => {
@@ -83,6 +83,7 @@ export class AuthService {
         if (ex.code === 11000) {
           throw new DuplicateRecordException();
         }
+        console.log(ex);
         return null;
       });
   }

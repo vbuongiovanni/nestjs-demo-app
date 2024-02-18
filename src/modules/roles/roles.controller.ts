@@ -5,7 +5,7 @@ import { plainToInstance } from 'class-transformer';
 import { Types } from 'mongoose';
 import { ReqAuthType } from 'src/common/decorators';
 import { AuthType } from 'src/common/types';
-import { ToObjectIdPipe } from 'src/common/pipes';
+import { ObjectIdParam } from 'src/common/decorators';
 
 @Controller('roles')
 export class RolesController {
@@ -25,22 +25,19 @@ export class RolesController {
 
   @Get(':id')
   @ReqAuthType(AuthType.Public)
-  async findRole(@Param('id', ToObjectIdPipe) id: Types.ObjectId): Promise<RoleResponseDto> {
+  async findRole(@ObjectIdParam('id') id: Types.ObjectId): Promise<RoleResponseDto> {
     const role = await this.rolesService.findRole(id);
     return plainToInstance(RoleResponseDto, role, { excludeExtraneousValues: true });
   }
 
   @Patch(':id')
-  async updateRole(
-    @Param('id', ToObjectIdPipe) id: Types.ObjectId,
-    @Body() updateRoleBody: UpdateRoleRequestDto,
-  ): Promise<RoleResponseDto> {
+  async updateRole(@ObjectIdParam('id') id: Types.ObjectId, @Body() updateRoleBody: UpdateRoleRequestDto): Promise<RoleResponseDto> {
     const updatedRole = this.rolesService.updateRole(id, updateRoleBody);
     return plainToInstance(RoleResponseDto, updatedRole, { excludeExtraneousValues: true });
   }
 
   @Delete(':id')
-  async removeRole(@Param('id', ToObjectIdPipe) id: Types.ObjectId): Promise<RoleResponseDto> {
+  async removeRole(@ObjectIdParam('id') id: Types.ObjectId): Promise<RoleResponseDto> {
     const removedRole = this.rolesService.removeRole(id);
     return plainToInstance(RoleResponseDto, removedRole, { excludeExtraneousValues: true });
   }

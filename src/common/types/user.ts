@@ -2,6 +2,7 @@ import { TPermission } from './permission';
 
 export interface IUser {
   _id: string;
+  companyId: string;
   name: string;
   email: string;
   password: string;
