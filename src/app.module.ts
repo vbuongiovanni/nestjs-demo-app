@@ -2,10 +2,12 @@ import { Module } from '@nestjs/common';
 import { CommonModule } from './common/common.module';
 import { UsersModule } from './modules/users/users.module';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { AuthModule } from './modules/auth/auth.module';
+import { redisConfig } from './common/config/redis.config';
 import { LoggerModule } from './logger/logger.module';
+import { CacheModule } from '@nestjs/cache-manager';
 import { CatsModule } from './modules/cats/cats.module';
+import { IamModule } from './modules/iam/iam.module';
+import { dbConfig } from './common/config/db.config';
 
 // TO DO :
 // Implement circuit breaker
@@ -16,19 +18,15 @@ import { CatsModule } from './modules/cats/cats.module';
 // // roles-based system
 // // google sign-in
 // // 2fa system
+// Aliased imports
 
 @Module({
   imports: [
     CommonModule,
+    CacheModule.registerAsync(redisConfig),
+    MongooseModule.forRootAsync(dbConfig),
     LoggerModule,
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get('mongoUri'),
-      }),
-      inject: [ConfigService],
-    }),
-    AuthModule,
+    IamModule,
     UsersModule,
     CatsModule,
   ],

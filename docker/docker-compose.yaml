@@ -1,6 +1,11 @@
 version: '3'
 
 services:
+  redis:
+    image: redis
+    restart: always
+    ports:
+      - '6380:6379'
   db:
     image: mongo
     restart: always

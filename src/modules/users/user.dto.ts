@@ -1,10 +1,13 @@
 import { Expose, Transform } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
-import { ConvertIdType } from '../../common/decorators/convert-id-type.decorator';
+import { ConvertIdType } from '../../common/decorators';
 
 export class CreateUserRequestDTO {
   @IsNotEmpty()
-  name: string;
+  firstName: string;
+
+  @IsNotEmpty()
+  lastName: string;
 
   @IsNotEmpty()
   @IsEmail()
@@ -16,16 +19,16 @@ export class CreateUserRequestDTO {
 
 export class UpdateUserRequestDTO {
   @IsOptional()
-  @IsNotEmpty()
-  name: string;
+  firstName: string;
 
   @IsOptional()
+  lastName: string;
+
   @IsNotEmpty()
   @IsEmail()
   email: string;
 
   @IsOptional()
-  @IsNotEmpty()
   password: string;
 }
 
@@ -37,7 +40,11 @@ export class UserResponseDTO {
 
   @IsNotEmpty()
   @Expose()
-  name: string;
+  firstName: string;
+
+  @IsNotEmpty()
+  @Expose()
+  lastName: string;
 
   @IsNotEmpty()
   @IsEmail()

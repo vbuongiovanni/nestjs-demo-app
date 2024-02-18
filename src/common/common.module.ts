@@ -1,14 +1,15 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
-import appConfig from './app.config';
+import appConfig from './config/app.config';
 import { RequestLoggerMiddleware } from './middleware';
 import { WrapResponseInterceptor } from './interceptors';
-import { AuthGuard } from './guards';
+import { AuthGuard } from '../modules/iam/authentication/guards';
 import { ApplicationValidationPipe } from './pipes';
 import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { Auth, AuthSchema, RequestLogger, RequestLoggerSchema } from '../mongodb';
 import { MongooseModule } from '@nestjs/mongoose';
+import { BearerGuard } from '../modules/iam/authentication/guards/bearer.guard';
 
 @Module({
   imports: [
@@ -18,12 +19,12 @@ import { MongooseModule } from '@nestjs/mongoose';
         PORT: Joi.number().default(3000),
         AUTH_KEY: Joi.string().required(),
         MONGO_URI: Joi.string().required(),
-        SALT_ROUNDS: Joi.number().required(),
-        // jwtSecret: Joi.string().required(),
-        // jwtAudience: Joi.string().required(),
-        // jwtPrincipal: Joi.string().required(),
-        // jwtTimeToLive: Joi.number().required(),
-        // jwtRefreshTimeToLive: Joi.number().required(),
+        JWT_SECRET: Joi.string().required(),
+        JWT_TOKEN_ISSUER: Joi.string().required(),
+        JWT_ACCESS_TOKEN_TTL: Joi.number().required(),
+        JWT_REFRESH_TOKEN_TTL: Joi.number().required(),
+        REDIS_PORT: Joi.number().default(6379),
+        REDIS_HOST: Joi.string().default('localhost'),
       }),
       load: [appConfig],
     }),
@@ -33,7 +34,6 @@ import { MongooseModule } from '@nestjs/mongoose';
     ]),
   ],
   providers: [
-    { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_INTERCEPTOR, useClass: WrapResponseInterceptor },
     { provide: APP_PIPE, useValue: ApplicationValidationPipe },
   ],
