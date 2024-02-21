@@ -8,6 +8,10 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
   app.useLogger(new CustomLogger());
   const port = configService.get('port');
+  app.enableCors({
+    origin: '*',
+    allowedHeaders: 'Origin, X-Requested-With, Content-Type, Authorization',
+  });
   await app.listen(port);
 }
 bootstrap();

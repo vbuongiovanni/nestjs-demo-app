@@ -16,11 +16,14 @@ export class RolesService {
     this.customLogger.setContext('RoleService');
   }
 
-  async createRole(createRoleDto: CreateRoleRequestDto) {
+  async createRole(companyId: Types.ObjectId, createRoleDto: CreateRoleRequestDto) {
     try {
-      const newRole = new this.roleModel(createRoleDto);
-      return await newRole.save().then((user) => user.toObject());
+      const newRole = new this.roleModel({ ...createRoleDto, companyId });
+      const savedRole = await newRole.save().then((user) => user.toObject());
+      console.log('savedRole', savedRole);
+      return savedRole;
     } catch (ex) {
+      console.log(ex);
       this.customLogger.logger(`Error in roles.service.createRole(): ${ex.message}`, ex);
       return null;
     }
@@ -62,7 +65,7 @@ export class RolesService {
       const role = await this.roleModel.findOne({ _id }).lean();
       if (role) {
         const users = await this.userModel.find({ companyId: role.companyId }).lean();
-        const usersWithRole = users.filter((user) => user.roles.includes(_id));
+        const usersWithRole = users.filter((user) => user.role._id === _id);
         if (usersWithRole.length > 0) {
           throw new Error(errorMessage);
         }

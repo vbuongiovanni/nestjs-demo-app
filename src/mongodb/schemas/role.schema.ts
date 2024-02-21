@@ -13,8 +13,8 @@ export class Role {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ required: true })
-  Permissions: TPermission[];
+  @Prop({ type: [String], default: [] })
+  permissions: TPermission[];
 }
 
 export const RoleSchema = SchemaFactory.createForClass(Role);

@@ -6,6 +6,7 @@ import { User, UserDocument } from '../../mongodb';
 import { CustomLogger } from '../../logger/custom-logger.service';
 import { DuplicateRecordException } from 'src/common/exceptions';
 import { Types } from 'mongoose';
+import { IUser } from 'src/common/types';
 
 @Injectable()
 export class UsersService {
@@ -43,13 +44,25 @@ export class UsersService {
     }
   }
 
-  findUser(_id: Types.ObjectId) {
+  async findUser(_id: Types.ObjectId) {
     try {
-      const user = this.userModel.findOne({ _id }).lean();
+      const [user] = await this.userModel.aggregate([
+        { $match: { _id } },
+        {
+          $lookup: {
+            from: 'roles',
+            localField: 'role',
+            foreignField: '_id',
+            as: 'role',
+            pipeline: [{ $project: { name: 1, permissions: 1, _id: 1 } }],
+          },
+        },
+        { $unwind: '$role' },
+      ]);
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      return user;
+      return user as IUser;
     } catch (ex) {
       if (ex.message === 'User not found') {
         throw ex;

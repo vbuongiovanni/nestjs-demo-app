@@ -4,9 +4,11 @@ import { UsersService } from './users.service';
 import { CreateUserRequestDTO, UpdateUserRequestDTO, UserResponseDTO } from './user.dto';
 import { plainToInstance } from 'class-transformer';
 import { Types } from 'mongoose';
-import { ObjectIdParam } from 'src/common/decorators';
+import { ObjectIdParam, ReqAuthType } from 'src/common/decorators';
+import { AuthType } from 'src/common/types';
 
 @Controller('users')
+@ReqAuthType(AuthType.Bearer)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

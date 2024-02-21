@@ -1,4 +1,4 @@
-import { TPermission } from './permission';
+import { Types } from 'mongoose';
 
 export interface IUser {
   _id: string;
@@ -6,5 +6,5 @@ export interface IUser {
   name: string;
   email: string;
   password: string;
-  permissions: TPermission[];
+  role: Types.ObjectId;
 }

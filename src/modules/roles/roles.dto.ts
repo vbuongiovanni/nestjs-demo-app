@@ -20,9 +20,11 @@ export class RoleResponseDto {
   @IsNotEmpty()
   @Expose()
   _id: string;
+
   @Expose()
   @IsNotEmpty()
   name: string;
+
   @IsNotEmpty()
   @Expose()
   permissions: TPermission[];

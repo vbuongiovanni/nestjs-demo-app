@@ -3,8 +3,8 @@ import { RolesService } from './roles.service';
 import { CreateRoleRequestDto, UpdateRoleRequestDto, RoleResponseDto } from './roles.dto';
 import { plainToInstance } from 'class-transformer';
 import { Types } from 'mongoose';
-import { ReqAuthType } from 'src/common/decorators';
-import { AuthType } from 'src/common/types';
+import { ActiveUser, ReqAuthType } from 'src/common/decorators';
+import { AuthType, IUser } from 'src/common/types';
 import { ObjectIdParam } from 'src/common/decorators';
 
 @Controller('roles')
@@ -12,8 +12,9 @@ export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
   @Post()
-  async createRole(@Body() createRoleBody: CreateRoleRequestDto): Promise<RoleResponseDto> {
-    const newRole = await this.rolesService.createRole(createRoleBody);
+  async createRole(@ActiveUser() user: IUser, @Body() createRoleBody: CreateRoleRequestDto): Promise<RoleResponseDto> {
+    const companyId = new Types.ObjectId(user.companyId);
+    const newRole = await this.rolesService.createRole(companyId, createRoleBody);
     return plainToInstance(RoleResponseDto, newRole, { excludeExtraneousValues: true });
   }
 

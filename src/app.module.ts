@@ -22,6 +22,8 @@ import { RolesModule } from './modules/roles/roles.module';
 // // 2fa system
 // Aliased imports
 
+// Start frontend, with super admin panel??? I can create companies, roles, and users??
+
 @Module({
   imports: [
     CommonModule,

@@ -1,6 +1,7 @@
 import { Expose, Transform } from 'class-transformer';
-import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, ValidateNested } from 'class-validator';
 import { ConvertIdType } from '../../common/decorators';
+import { RoleResponseDto } from '../roles/roles.dto';
 
 export class CreateUserRequestDTO {
   @IsNotEmpty()
@@ -50,4 +51,9 @@ export class UserResponseDTO {
   @IsEmail()
   @Expose()
   email: string;
+
+  @IsNotEmpty()
+  @Expose()
+  @ValidateNested()
+  role: RoleResponseDto;
 }

@@ -22,7 +22,7 @@ export class User {
   password: string;
 
   @Prop()
-  roles: Types.ObjectId[];
+  role: Types.ObjectId;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

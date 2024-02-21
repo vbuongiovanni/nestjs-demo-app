@@ -42,15 +42,13 @@ export class AuthService {
 
   private async generateTokens(user: IUser) {
     const refreshTokenId = randomUUID();
-    const { email, _id, permissions } = user;
+    const { email, _id, companyId, role } = user;
     const userId = _id.toString();
-    console.log('userId', userId);
     const [accessToken, refreshToken] = await Promise.all([
-      this.signToken(userId, this.jwtConfiguration.accessTokenTtl, { email, permissions }),
+      this.signToken(userId, this.jwtConfiguration.accessTokenTtl, { email, companyId, role }),
       this.signToken(refreshTokenId, this.jwtConfiguration.refreshTokenTtl, { userId, refreshTokenId }),
     ]);
     await this.refreshTokenService.insert(userId, refreshTokenId);
-    // await this.refreshTokenIdsStoragee.insert(userId, refreshTokenId);
     return { accessToken, refreshToken };
   }
 
@@ -83,7 +81,6 @@ export class AuthService {
         if (ex.code === 11000) {
           throw new DuplicateRecordException();
         }
-        console.log(ex);
         return null;
       });
   }
@@ -103,7 +100,6 @@ export class AuthService {
       });
       if (!user) throw new UnauthorizedException('Invalid user.');
 
-      console.log('userId', userId);
       // await this.refreshTokenIdsStoragee.validate(userId, refreshTokenId);
 
       const isValid = await this.refreshTokenService
