@@ -16,6 +16,9 @@ export class CreateUserRequestDTO {
 
   @IsNotEmpty()
   password: string;
+
+  @IsOptional()
+  isCompanyAdmin: boolean;
 }
 
 export class UpdateUserRequestDTO {
@@ -31,6 +34,9 @@ export class UpdateUserRequestDTO {
 
   @IsOptional()
   password: string;
+
+  @IsOptional()
+  isCompanyAdmin: boolean;
 }
 
 export class UserResponseDTO {
@@ -38,6 +44,11 @@ export class UserResponseDTO {
   @Expose()
   @ConvertIdType('string')
   _id: string;
+
+  @IsNotEmpty()
+  @Expose()
+  @ConvertIdType('string')
+  companyId: string;
 
   @IsNotEmpty()
   @Expose()
@@ -56,4 +67,7 @@ export class UserResponseDTO {
   @Expose()
   @ValidateNested()
   role: RoleResponseDto;
+
+  @Expose()
+  isCompanyAdmin: boolean;
 }

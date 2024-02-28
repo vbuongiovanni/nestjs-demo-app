@@ -9,6 +9,9 @@ export class User {
   @Prop({ required: true })
   companyId: Types.ObjectId;
 
+  @Prop({ default: false })
+  isCompanyAdmin: boolean;
+
   @Prop({ required: true })
   firstName: string;
 

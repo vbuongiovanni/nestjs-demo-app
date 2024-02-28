@@ -100,24 +100,18 @@ export class AuthService {
       });
       if (!user) throw new UnauthorizedException('Invalid user.');
 
-      // await this.refreshTokenIdsStoragee.validate(userId, refreshTokenId);
+      await this.refreshTokenService.validate(userId, refreshTokenId).then(async (res) => {
+        await this.refreshTokenService.invalidate(userId);
+        return res;
+      });
 
-      const isValid = await this.refreshTokenService
-        .validate(userId, refreshTokenId)
-        .then(async (res) => {
-          await this.refreshTokenService.invalidate(userId);
-          return res;
-        })
-        .catch((ex) => {
-          if (ex instanceof InvalidatedRefreshTokenException) {
-            // this is where we can either notify the user that they have been compromised or
-            // just log the instance in a db.
-            throw new InvalidatedRefreshTokenException();
-          }
-        });
       return await this.generateTokens(user);
     } catch (ex) {
-      throw new UnauthorizedException();
+      if (ex instanceof InvalidatedRefreshTokenException) {
+        // this is where we can either notify the user that they have been compromised or
+        // just log the instance in a db.
+      }
+      throw ex;
     }
   }
 }
