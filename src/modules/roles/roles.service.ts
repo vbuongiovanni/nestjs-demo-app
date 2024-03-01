@@ -20,10 +20,8 @@ export class RolesService {
     try {
       const newRole = new this.roleModel({ ...createRoleDto, companyId });
       const savedRole = await newRole.save().then((user) => user.toObject());
-      console.log('savedRole', savedRole);
       return savedRole;
     } catch (ex) {
-      console.log(ex);
       this.customLogger.logger(`Error in roles.service.createRole(): ${ex.message}`, ex);
       return null;
     }
@@ -65,7 +63,7 @@ export class RolesService {
       const role = await this.roleModel.findOne({ _id }).lean();
       if (role) {
         const users = await this.userModel.find({ companyId: role.companyId }).lean();
-        const usersWithRole = users.filter((user) => user.role._id === _id);
+        const usersWithRole = users.filter((user) => user.roleId === _id);
         if (usersWithRole.length > 0) {
           throw new Error(errorMessage);
         }

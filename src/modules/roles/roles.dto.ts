@@ -1,5 +1,6 @@
 import { Expose } from 'class-transformer';
 import { IsNotEmpty } from 'class-validator';
+import { ConvertIdType } from 'src/common/decorators';
 import { TPermission } from 'src/common/types';
 
 export class CreateRoleRequestDto {
@@ -19,6 +20,7 @@ export class UpdateRoleRequestDto {
 export class RoleResponseDto {
   @IsNotEmpty()
   @Expose()
+  @ConvertIdType('string')
   _id: string;
 
   @Expose()

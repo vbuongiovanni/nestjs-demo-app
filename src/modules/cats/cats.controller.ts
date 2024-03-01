@@ -1,8 +1,11 @@
 import { Body, Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
 import { UpdateCatRequestDto, CreateCatRequestDto } from './cats.dto';
 import { CatsService } from './cats.service';
+import { ReqAuthType } from 'src/common/decorators';
+import { AuthType } from 'src/common/types';
 
 @Controller('cats')
+@ReqAuthType(AuthType.Bearer)
 export class CatsController {
   constructor(private readonly catsService: CatsService) {}
   @Post('')

@@ -42,7 +42,7 @@ export class UsersController {
 
   @Delete(':id')
   async removeUser(@ObjectIdParam('id') id: Types.ObjectId): Promise<UserResponseDTO> {
-    const removedUser = await this.usersService.removeUser(id);
-    return plainToInstance(UserResponseDTO, removedUser, { excludeExtraneousValues: true });
+    await this.usersService.removeUser(id);
+    return undefined;
   }
 }

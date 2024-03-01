@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Company, CompanyDocument } from 'src/mongodb/schemas/company.schema';
 import { Model, Types } from 'mongoose';
 import { CustomLogger } from 'src/logger/custom-logger.service';
+import { DuplicateRecordException } from 'src/common/exceptions';
 
 @Injectable()
 export class CompaniesService {
@@ -26,8 +27,8 @@ export class CompaniesService {
 
   async findAllCompanies() {
     try {
-      const allRoles = await this.companyModel.find().lean();
-      return allRoles;
+      const allCompanies = await this.companyModel.find().lean();
+      return allCompanies;
     } catch (ex) {
       this.customLogger.logger(`Error in companies.service.findAllCompanies(): ${ex.message}`, ex);
       return null;
@@ -36,8 +37,8 @@ export class CompaniesService {
 
   async findCompany(_id: Types.ObjectId) {
     try {
-      const newRole = await this.companyModel.findOne({ _id }).lean();
-      return newRole;
+      const company = await this.companyModel.findOne({ _id }).lean();
+      return company;
     } catch (ex) {
       this.customLogger.logger(`Error in companies.service.findCompany(): ${ex.message}`, ex);
       return null;
@@ -46,8 +47,8 @@ export class CompaniesService {
 
   async updateCompany(_id: Types.ObjectId, updateCompanyBody: UpdateCompanyRequestDto) {
     try {
-      const updatedRole = await this.companyModel.findOneAndUpdate({ _id }, updateCompanyBody, { new: true }).lean();
-      return updatedRole;
+      const updateCompany = await this.companyModel.findOneAndUpdate({ _id }, updateCompanyBody, { new: true }).lean();
+      return updateCompany;
     } catch (ex) {
       this.customLogger.logger(`Error in companies.service.updateCompany(): ${ex.message}`, ex);
       return null;
@@ -56,8 +57,8 @@ export class CompaniesService {
 
   async removeCompany(_id: Types.ObjectId) {
     try {
-      const newRole = await this.companyModel.findOneAndDelete({ _id }).lean();
-      return newRole;
+      await this.companyModel.findOneAndDelete({ _id }).lean();
+      return 'Success';
     } catch (ex) {
       this.customLogger.logger(`Error in companies.service.removeCompany(): ${ex.message}`, ex);
       return null;

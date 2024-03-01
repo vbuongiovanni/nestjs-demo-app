@@ -1,5 +1,7 @@
 import { Expose } from 'class-transformer';
-import { IsNotEmpty } from 'class-validator';
+import { IsEmail, IsNotEmpty, Validate, ValidateNested } from 'class-validator';
+import { ConvertIdType } from 'src/common/decorators';
+import { CreateUserRequestDTO } from '../users/user.dto';
 
 export class CreateCompanyRequestDto {
   @IsNotEmpty()
@@ -11,11 +13,44 @@ export class UpdateCompanyRequestDto {
   name: string;
 }
 
+export class RegisterNewCompanyDto {
+  @IsNotEmpty()
+  companyName: string;
+
+  @IsNotEmpty()
+  firstName: string;
+
+  @IsNotEmpty()
+  lastName: string;
+
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+}
+
 export class CompanyResponseDto {
   @IsNotEmpty()
   @Expose()
+  @ConvertIdType('string')
   _id: string;
+
   @Expose()
   @IsNotEmpty()
   name: string;
+}
+
+export class CreateCompanyResponseDto {
+  @IsNotEmpty()
+  @Expose()
+  @ConvertIdType('string')
+  _id: string;
+
+  @Expose()
+  @IsNotEmpty()
+  name: string;
+
+  @Expose()
+  @IsNotEmpty()
+  @ValidateNested()
+  accountOwner: CreateUserRequestDTO;
 }

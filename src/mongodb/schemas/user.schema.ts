@@ -22,10 +22,13 @@ export class User {
   email: string;
 
   @Prop({ required: true })
+  phone: string;
+
+  @Prop({ required: true })
   password: string;
 
-  @Prop()
-  role: Types.ObjectId;
+  @Prop({ required: true })
+  roleId: Types.ObjectId;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

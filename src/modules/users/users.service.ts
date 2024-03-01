@@ -6,7 +6,6 @@ import { User, UserDocument } from '../../mongodb';
 import { CustomLogger } from '../../logger/custom-logger.service';
 import { DuplicateRecordException } from 'src/common/exceptions';
 import { Types } from 'mongoose';
-import { IUser } from 'src/common/types';
 
 @Injectable()
 export class UsersService {
@@ -19,15 +18,11 @@ export class UsersService {
 
   async createUser(user: CreateUserRequestDTO) {
     try {
-      const foundUser = await this.userModel.findOne({ email: user.email });
-      if (foundUser) {
-        throw new DuplicateRecordException();
-      }
       const newUser = new this.userModel(user);
       return newUser.save().then((user) => user.toObject());
     } catch (ex) {
       if (ex.message === 'User already exists') {
-        throw ex;
+        throw new DuplicateRecordException();
       }
       this.customLogger.logger(`Error in users.service userModel.find(): ${ex.message}`, ex);
       return null;
@@ -46,23 +41,11 @@ export class UsersService {
 
   async findUser(_id: Types.ObjectId) {
     try {
-      const [user] = await this.userModel.aggregate([
-        { $match: { _id } },
-        {
-          $lookup: {
-            from: 'roles',
-            localField: 'role',
-            foreignField: '_id',
-            as: 'role',
-            pipeline: [{ $project: { name: 1, permissions: 1, _id: 1 } }],
-          },
-        },
-        { $unwind: '$role' },
-      ]);
+      const user = await this.userModel.findOne({ _id });
       if (!user) {
         throw new NotFoundException('User not found');
       }
-      return user as IUser;
+      return user;
     } catch (ex) {
       if (ex.message === 'User not found') {
         throw ex;

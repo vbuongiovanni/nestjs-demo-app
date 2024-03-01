@@ -10,6 +10,7 @@ import { IamModule } from './modules/iam/iam.module';
 import { dbConfig } from './common/config/db.config';
 import { CompaniesModule } from './modules/companies/companies.module';
 import { RolesModule } from './modules/roles/roles.module';
+import { RequestLogsModule } from './modules/request-logger/requestLogs.module';
 
 // TO DO :
 // Implement circuit breaker
@@ -35,6 +36,7 @@ import { RolesModule } from './modules/roles/roles.module';
     CatsModule,
     CompaniesModule,
     RolesModule,
+    RequestLogsModule,
   ],
   controllers: [],
   providers: [],

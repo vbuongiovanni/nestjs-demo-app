@@ -1,13 +1,19 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
-import { CreateCompanyRequestDto, UpdateCompanyRequestDto, CompanyResponseDto } from './companies.dto';
+import { CreateCompanyRequestDto, UpdateCompanyRequestDto, CompanyResponseDto, RegisterNewCompanyDto } from './companies.dto';
 import { plainToInstance } from 'class-transformer';
 import { Types } from 'mongoose';
-import { ObjectIdParam } from 'src/common/decorators';
+import { ObjectIdParam, ReqAuthType } from 'src/common/decorators';
+import { AuthType } from 'src/common/types';
+import { UsersService } from '../users/users.service';
 
 @Controller('companies')
+@ReqAuthType(AuthType.Bearer)
 export class CompaniesController {
-  constructor(private readonly companiesService: CompaniesService) {}
+  constructor(
+    private readonly companiesService: CompaniesService,
+    private readonly usersService: UsersService,
+  ) {}
 
   @Post()
   async createCompany(@Body() createCompanyDto: CreateCompanyRequestDto): Promise<CompanyResponseDto> {
@@ -40,5 +46,12 @@ export class CompaniesController {
   async removeCompany(@ObjectIdParam('id') id: Types.ObjectId): Promise<CompanyResponseDto> {
     const removedCompany = await this.companiesService.removeCompany(id);
     return plainToInstance(CompanyResponseDto, removedCompany, { excludeExtraneousValues: true });
+  }
+
+  @Post('/register-company')
+  async registerNewCompany(@Body() registerNewCompanyDto: RegisterNewCompanyDto) {
+    const { companyName, firstName, lastName, email } = registerNewCompanyDto;
+    const newCompany = await this.companiesService.createCompany({ name: companyName });
+    return plainToInstance(CompanyResponseDto, newCompany, { excludeExtraneousValues: true });
   }
 }
