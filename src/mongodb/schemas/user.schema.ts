@@ -29,6 +29,9 @@ export class User {
 
   @Prop({ required: true })
   roleId: Types.ObjectId;
+
+  @Prop({ default: false })
+  isRegistered: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

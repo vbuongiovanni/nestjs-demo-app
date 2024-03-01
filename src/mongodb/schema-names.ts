@@ -4,4 +4,5 @@ export enum SchemaName {
   User = 'users',
   Role = 'roles',
   RequestLogger = 'request-logger',
+  Invite = 'invites',
 }

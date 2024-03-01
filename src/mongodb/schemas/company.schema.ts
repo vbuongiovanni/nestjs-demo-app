@@ -9,7 +9,7 @@ export class Company {
   @Prop({ required: true, unique: true })
   name: string;
 
-  @Prop({ required: true })
+  @Prop()
   accountOwner: Types.ObjectId;
 }
 
