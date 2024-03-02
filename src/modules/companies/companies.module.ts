@@ -4,6 +4,9 @@ import { CompaniesController } from './companies.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Company, CompanySchema, Invite, InviteSchema } from 'src/mongodb';
 import { CustomLogger } from 'src/logger/custom-logger.service';
+import { EmailService } from '../email/email.service';
+import { InvitesService } from '../invites/invites.service';
+import { ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -13,6 +16,6 @@ import { CustomLogger } from 'src/logger/custom-logger.service';
     ]),
   ],
   controllers: [CompaniesController],
-  providers: [CompaniesService, CustomLogger],
+  providers: [CompaniesService, CustomLogger, EmailService, InvitesService, ConfigService],
 })
 export class CompaniesModule {}

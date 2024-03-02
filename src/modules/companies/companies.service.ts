@@ -1,26 +1,38 @@
 import { Injectable } from '@nestjs/common';
-import { CreateCompanyRequestDto, UpdateCompanyRequestDto } from './companies.dto';
+import { UpdateCompanyRequestDto } from './companies.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Company, CompanyDocument } from 'src/mongodb/schemas/company.schema';
 import { Model, Types } from 'mongoose';
 import { CustomLogger } from 'src/logger/custom-logger.service';
-import { DuplicateRecordException } from 'src/common/exceptions';
+import { InvitesService } from '../invites/invites.service';
+import { CreateWelcomeAboardInviteRequestDto } from '../invites/invites.dto';
 
 @Injectable()
 export class CompaniesService {
   constructor(
     @InjectModel(Company.name) private readonly companyModel: Model<CompanyDocument>,
-    private customLogger: CustomLogger,
+    private readonly invitesService: InvitesService,
+    private readonly customLogger: CustomLogger,
   ) {
     this.customLogger.setContext('CompanyService');
   }
 
-  async createCompany(createCompanyBody: CreateCompanyRequestDto) {
+  async createCompany(name: string) {
     try {
-      const newCompany = new this.companyModel(createCompanyBody);
-      return await newCompany.save().then((user) => user.toObject());
+      const newCompany = new this.companyModel({ name });
+      return await newCompany.save().then((company) => company.toObject());
     } catch (ex) {
       this.customLogger.logger(`Error in companies.service.createCompany(): ${ex.message}`, ex);
+      return null;
+    }
+  }
+
+  async createWelcomeAboardInvite(createInviteDto: CreateWelcomeAboardInviteRequestDto) {
+    try {
+      const invite = await this.invitesService.createInvite(createInviteDto);
+      return invite;
+    } catch (ex) {
+      this.customLogger.logger(`Error in companies.service.createWelcomeAboardInvite(): ${ex.message}`, ex);
       return null;
     }
   }

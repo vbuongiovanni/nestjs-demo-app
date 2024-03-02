@@ -1,23 +1,52 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
-import { CreateCompanyRequestDto, UpdateCompanyRequestDto, CompanyResponseDto, RegisterNewCompanyDto } from './companies.dto';
+import { UpdateCompanyRequestDto, CompanyResponseDto, CreateCompanyRequestDto } from './companies.dto';
 import { plainToInstance } from 'class-transformer';
 import { Types } from 'mongoose';
 import { ObjectIdParam, ReqAuthType } from 'src/common/decorators';
 import { AuthType } from 'src/common/types';
-import { UsersService } from '../users/users.service';
+import { EmailService } from '../email/email.service';
+import { InviteType } from 'src/mongodb';
+import { ConfigService } from '@nestjs/config';
+import { TemplateType } from '../email/types';
 
 @Controller('companies')
 @ReqAuthType(AuthType.Bearer)
 export class CompaniesController {
   constructor(
+    private readonly configService: ConfigService,
     private readonly companiesService: CompaniesService,
-    private readonly usersService: UsersService,
+    private readonly emailService: EmailService,
   ) {}
 
-  @Post()
-  async createCompany(@Body() createCompanyDto: CreateCompanyRequestDto): Promise<CompanyResponseDto> {
-    const newCompany = await this.companiesService.createCompany(createCompanyDto);
+  @Post('/register')
+  async registerNewCompany(@Body() registerNewCompanyDto: CreateCompanyRequestDto) {
+    const url = this.configService.get<string>('FRONTEND_URL');
+    const { companyName, firstName, lastName, email } = registerNewCompanyDto;
+    const newCompany = await this.companiesService.createCompany(companyName);
+    const companyId = newCompany._id;
+    const createInviteDto = {
+      companyId: companyId,
+      type: InviteType.welcomeAboard,
+    };
+    const invite = await this.companiesService.createWelcomeAboardInvite(createInviteDto);
+
+    const emailData = {
+      email,
+      firstName,
+      lastName,
+      companyName,
+      content: {
+        type: TemplateType.welcomeAboard,
+        context: {
+          link: `${url}/${companyId}/${invite.link}`,
+          name: `${firstName} ${lastName}`,
+        },
+      },
+    };
+
+    await this.emailService.sendMail(emailData);
+
     return plainToInstance(CompanyResponseDto, newCompany, { excludeExtraneousValues: true });
   }
 
@@ -46,12 +75,5 @@ export class CompaniesController {
   async removeCompany(@ObjectIdParam('id') id: Types.ObjectId): Promise<CompanyResponseDto> {
     const removedCompany = await this.companiesService.removeCompany(id);
     return plainToInstance(CompanyResponseDto, removedCompany, { excludeExtraneousValues: true });
-  }
-
-  @Post('/register-company')
-  async registerNewCompany(@Body() registerNewCompanyDto: RegisterNewCompanyDto) {
-    const { companyName, firstName, lastName, email } = registerNewCompanyDto;
-    const newCompany = await this.companiesService.createCompany({ name: companyName });
-    return plainToInstance(CompanyResponseDto, newCompany, { excludeExtraneousValues: true });
   }
 }

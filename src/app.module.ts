@@ -11,6 +11,8 @@ import { dbConfig } from './common/config/db.config';
 import { CompaniesModule } from './modules/companies/companies.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { RequestLogsModule } from './modules/request-logger/requestLogs.module';
+import { MailerModule } from '@nestjs-modules/mailer';
+import { EmailModule } from './modules/email/email.module';
 
 // TO DO :
 // Implement circuit breaker
@@ -36,6 +38,7 @@ import { RequestLogsModule } from './modules/request-logger/requestLogs.module';
     CatsModule,
     CompaniesModule,
     RolesModule,
+    EmailModule,
     RequestLogsModule,
   ],
   controllers: [],

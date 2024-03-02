@@ -3,17 +3,12 @@ import { IsEmail, IsNotEmpty, Validate, ValidateNested } from 'class-validator';
 import { ConvertIdType } from 'src/common/decorators';
 import { CreateUserRequestDTO } from '../users/user.dto';
 
-export class CreateCompanyRequestDto {
-  @IsNotEmpty()
-  name: string;
-}
-
 export class UpdateCompanyRequestDto {
   @IsNotEmpty()
   name: string;
 }
 
-export class RegisterNewCompanyDto {
+export class CreateCompanyRequestDto {
   @IsNotEmpty()
   companyName: string;
 
