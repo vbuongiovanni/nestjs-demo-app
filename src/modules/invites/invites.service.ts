@@ -32,9 +32,9 @@ export class InvitesService {
       return null;
     }
   }
-  async findInvite(_id: string) {
+  async findInvite(companyId: Types.ObjectId, link: string) {
     try {
-      return await this.inviteModel.findOne({ _id }).lean();
+      return await this.inviteModel.findOne({ companyId, link }).lean();
     } catch (ex) {
       this.customLogger.logger(`Error in invites.service.findInvite(): ${ex.message}`, ex);
       return null;

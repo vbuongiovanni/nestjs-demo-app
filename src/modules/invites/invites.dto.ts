@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsOptional } from 'class-validator';
 import { InviteType, InviteStatus } from '../../mongodb/schemas/invite.schema';
 import { Types } from 'mongoose';
-import { Expose } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
 
 export class CreateInviteRequestDto {
   @IsNotEmpty()

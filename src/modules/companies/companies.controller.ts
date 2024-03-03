@@ -39,7 +39,7 @@ export class CompaniesController {
       content: {
         type: TemplateType.welcomeAboard,
         context: {
-          link: `${url}/${companyId}/${invite.link}`,
+          link: `${url}/register/${companyId}/${invite.link}`,
           name: `${firstName} ${lastName}`,
         },
       },

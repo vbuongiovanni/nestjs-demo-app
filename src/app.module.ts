@@ -13,6 +13,7 @@ import { RolesModule } from './modules/roles/roles.module';
 import { RequestLogsModule } from './modules/request-logger/requestLogs.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { EmailModule } from './modules/email/email.module';
+import { InvitesModule } from './modules';
 
 // TO DO :
 // Implement circuit breaker
@@ -40,6 +41,7 @@ import { EmailModule } from './modules/email/email.module';
     RolesModule,
     EmailModule,
     RequestLogsModule,
+    InvitesModule,
   ],
   controllers: [],
   providers: [],

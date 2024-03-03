@@ -2,6 +2,9 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { InvitesService } from './invites.service';
 import { CreateInviteRequestDto, UpdateInviteRequestDto, InviteResponseDto } from './invites.dto';
 import { plainToInstance } from 'class-transformer';
+import { ObjectIdParam, ReqAuthType } from 'src/common/decorators';
+import { AuthType } from 'src/common/types';
+import { Types } from 'mongoose';
 
 @Controller('invites')
 export class InvitesController {
@@ -19,9 +22,10 @@ export class InvitesController {
     return plainToInstance(InviteResponseDto, invites);
   }
 
-  @Get(':id')
-  async findInvite(@Param('id') id: string) {
-    const invites = await this.invitesService.findInvite(id);
+  @ReqAuthType(AuthType.Public)
+  @Get('/:companyId/:linkId')
+  async findInvite(@ObjectIdParam('companyId') companyId: Types.ObjectId, @Param('linkId') linkId: string) {
+    const invites = await this.invitesService.findInvite(companyId, linkId);
     return plainToInstance(InviteResponseDto, invites);
   }
 
