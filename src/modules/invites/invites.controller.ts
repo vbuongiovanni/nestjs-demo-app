@@ -13,25 +13,25 @@ export class InvitesController {
   @Post()
   async createInvite(@Body() createInviteBody: CreateInviteRequestDto) {
     const newInvite = await this.invitesService.createInvite(createInviteBody);
-    return plainToInstance(InviteResponseDto, newInvite);
+    return plainToInstance(InviteResponseDto, newInvite, { excludeExtraneousValues: true });
   }
 
   @Get()
   async findInvites() {
     const invites = await this.invitesService.findAllInvites();
-    return plainToInstance(InviteResponseDto, invites);
+    return plainToInstance(InviteResponseDto, invites, { excludeExtraneousValues: true });
   }
 
   @ReqAuthType(AuthType.Public)
   @Get('/:companyId/:linkId')
   async findInvite(@ObjectIdParam('companyId') companyId: Types.ObjectId, @Param('linkId') linkId: string) {
     const invites = await this.invitesService.findInvite(companyId, linkId);
-    return plainToInstance(InviteResponseDto, invites);
+    return plainToInstance(InviteResponseDto, invites, { excludeExtraneousValues: true });
   }
 
   @Patch(':id')
   async updateInvite(@Param('id') id: string, @Body() updateInviteBody: UpdateInviteRequestDto) {
     const updatedInvite = await this.invitesService.updateInvite(id, updateInviteBody);
-    return plainToInstance(InviteResponseDto, updatedInvite);
+    return plainToInstance(InviteResponseDto, updatedInvite, { excludeExtraneousValues: true });
   }
 }

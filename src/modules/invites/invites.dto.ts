@@ -2,6 +2,7 @@ import { IsNotEmpty, IsOptional } from 'class-validator';
 import { InviteType, InviteStatus } from '../../mongodb/schemas/invite.schema';
 import { Types } from 'mongoose';
 import { Expose, Transform } from 'class-transformer';
+import { ConvertIdType } from 'src/common/decorators';
 
 export class CreateInviteRequestDto {
   @IsNotEmpty()
@@ -34,6 +35,11 @@ export class UpdateInviteRequestDto {
 }
 
 export class InviteResponseDto {
+  @Expose()
+  @IsNotEmpty()
+  @ConvertIdType('string')
+  _id: string;
+
   @Expose()
   @IsNotEmpty()
   link: string;

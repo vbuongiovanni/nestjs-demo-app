@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserRequestDTO, UpdateUserRequestDTO } from './user.dto';
+import { CreateAccountOwnerRequestDTO, CreateUserRequestDTO, UpdateUserRequestDTO } from './user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { User, UserDocument } from '../../mongodb';
+import { Company, CompanyDocument, Invite, InviteDocument, Role, RoleDocument, User, UserDocument } from '../../mongodb';
 import { CustomLogger } from '../../logger/custom-logger.service';
 import { DuplicateRecordException } from 'src/common/exceptions';
 import { Types } from 'mongoose';
@@ -11,6 +11,9 @@ import { Types } from 'mongoose';
 export class UsersService {
   constructor(
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    @InjectModel(Invite.name) private readonly inviteModel: Model<InviteDocument>,
+    @InjectModel(Role.name) private readonly roleModel: Model<RoleDocument>,
+    @InjectModel(Company.name) private readonly companyModel: Model<CompanyDocument>,
     private customLogger: CustomLogger,
   ) {
     this.customLogger.setContext('UserService');
@@ -20,6 +23,43 @@ export class UsersService {
     try {
       const newUser = new this.userModel(user);
       return newUser.save().then((user) => user.toObject());
+    } catch (ex) {
+      if (ex.message === 'User already exists') {
+        throw new DuplicateRecordException();
+      }
+      this.customLogger.logger(`Error in users.service userModel.find(): ${ex.message}`, ex);
+      return null;
+    }
+  }
+
+  async createAccountOwner(inviteId: Types.ObjectId, newUserBody: CreateAccountOwnerRequestDTO) {
+    try {
+      const { firstName, lastName, email, phone, password, linkId } = newUserBody;
+      const companyId = new Types.ObjectId(newUserBody.companyId);
+      const verifiedInvite = await this.inviteModel.findOne({ _id: inviteId, companyId, link: linkId });
+      if (verifiedInvite) {
+        const role = await this.roleModel.findOne({ name: 'Admin' });
+        const roleId = role._id;
+        const newUser = new this.userModel({
+          companyId,
+          firstName,
+          lastName,
+          email,
+          phone,
+          password,
+          isCompanyAdmin: true,
+          isRegistered: true,
+          roleId,
+        });
+
+        const newUserDocument = newUser.save().then(async (user) => {
+          await this.inviteModel.findOneAndUpdate({ _id: inviteId }, { status: 'accepted', dateUpdated: new Date() });
+          await this.companyModel.findOneAndUpdate({ _id: companyId }, { accountOwner: newUser._id });
+          return user.toObject();
+        });
+      } else {
+        throw new BadRequestException('Invalid invite');
+      }
     } catch (ex) {
       if (ex.message === 'User already exists') {
         throw new DuplicateRecordException();

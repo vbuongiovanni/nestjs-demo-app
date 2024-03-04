@@ -1,5 +1,5 @@
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
-import { CreateUserRequestDTO, UpdateUserRequestDTO } from '../../modules/users/user.dto';
+import { CreateAccountOwnerRequestDTO, CreateUserRequestDTO, UpdateUserRequestDTO } from '../../modules/users/user.dto';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 
@@ -11,8 +11,12 @@ const performHash = async (body: { password: string }, saltRounds = 10) => {
 @Injectable()
 export class HashPasswordPipe implements PipeTransform {
   constructor(private readonly configService: ConfigService) {}
-  async transform(userRequestBody: CreateUserRequestDTO, metadata: ArgumentMetadata) {
-    const saltRounds = this.configService.get<number>('saltRounds');
-    return await performHash(userRequestBody, saltRounds);
+  async transform(value: CreateUserRequestDTO | CreateAccountOwnerRequestDTO, metadata: ArgumentMetadata) {
+    if (metadata.type === 'body') {
+      const saltRounds = this.configService.get<number>('saltRounds');
+      return await performHash(value, saltRounds);
+    } else {
+      return value;
+    }
   }
 }

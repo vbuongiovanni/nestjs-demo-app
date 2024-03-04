@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes } from '@nestjs/common';
 import { HashPasswordPipe } from '../../common/pipes/hash-password.pipe';
 import { UsersService } from './users.service';
-import { CreateUserRequestDTO, UpdateUserRequestDTO, UserResponseDTO } from './user.dto';
+import { CreateAccountOwnerRequestDTO, CreateUserRequestDTO, UpdateUserRequestDTO, UserResponseDTO } from './user.dto';
 import { plainToInstance } from 'class-transformer';
 import { Types } from 'mongoose';
 import { ObjectIdParam, ReqAuthType } from 'src/common/decorators';
@@ -15,7 +15,19 @@ export class UsersController {
   @Post()
   @UsePipes(HashPasswordPipe)
   async createUser(@Body() createUserBody: CreateUserRequestDTO): Promise<UserResponseDTO> {
+    console.log(createUserBody);
     const newUser = await this.usersService.createUser(createUserBody);
+    return plainToInstance(UserResponseDTO, newUser, { excludeExtraneousValues: true });
+  }
+
+  @Post('/:inviteId')
+  @ReqAuthType(AuthType.Public)
+  @UsePipes(HashPasswordPipe)
+  async createAccountOwner(
+    @ObjectIdParam('inviteId') inviteId: Types.ObjectId,
+    @Body() createUserBody: CreateAccountOwnerRequestDTO,
+  ): Promise<UserResponseDTO> {
+    const newUser = await this.usersService.createAccountOwner(inviteId, createUserBody);
     return plainToInstance(UserResponseDTO, newUser, { excludeExtraneousValues: true });
   }
 
