@@ -5,6 +5,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Invite, InviteDocument } from 'src/mongodb';
 import { CustomLogger } from 'src/logger/custom-logger.service';
+import { TQuery } from 'src/common/types/query';
 
 @Injectable()
 export class InvitesService {
@@ -24,7 +25,7 @@ export class InvitesService {
       return null;
     }
   }
-  async findAllInvites() {
+  async findAllInvitesAdmin() {
     try {
       return await this.inviteModel.find().lean();
     } catch (ex) {
@@ -32,17 +33,25 @@ export class InvitesService {
       return null;
     }
   }
-  async findInvite(companyId: Types.ObjectId, link: string) {
+  async findAllInvites(query: TQuery) {
     try {
-      return await this.inviteModel.findOne({ companyId, link }).lean();
+      return await this.inviteModel.find(query).lean();
+    } catch (ex) {
+      this.customLogger.logger(`Error in invites.service.findAllInvites(): ${ex.message}`, ex);
+      return null;
+    }
+  }
+  async findInvite(query: { _id?: Types.ObjectId; companyId?: Types.ObjectId; link?: string }) {
+    try {
+      return await this.inviteModel.findOne(query).lean();
     } catch (ex) {
       this.customLogger.logger(`Error in invites.service.findInvite(): ${ex.message}`, ex);
       return null;
     }
   }
-  async updateInvite(_id: string, updateInviteBody: UpdateInviteRequestDto) {
+  async updateInvite(query: TQuery, updateInviteBody: UpdateInviteRequestDto) {
     try {
-      const updateCompany = await this.inviteModel.findOneAndUpdate({ _id }, updateInviteBody, { new: true }).lean();
+      const updateCompany = await this.inviteModel.findOneAndUpdate(query, updateInviteBody, { new: true }).lean();
       return updateCompany;
     } catch (ex) {
       this.customLogger.logger(`Error in invites.service.updateInvite(): ${ex.message}`, ex);

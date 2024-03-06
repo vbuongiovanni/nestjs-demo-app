@@ -7,6 +7,11 @@ import { CustomLogger } from '../../logger/custom-logger.service';
 import { DuplicateRecordException } from 'src/common/exceptions';
 import { Types } from 'mongoose';
 
+type TQuery =
+  | { companyId: Types.ObjectId; _id?: Types.ObjectId }
+  | { $and: [{ _id: Types.ObjectId }, { companyId: { $in: Types.ObjectId[] } }] }
+  | { companyId: { $in: Types.ObjectId[] } };
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -52,8 +57,8 @@ export class UsersService {
           roleId,
         });
 
-        const newUserDocument = newUser.save().then(async (user) => {
-          await this.inviteModel.findOneAndUpdate({ _id: inviteId }, { status: 'accepted', dateUpdated: new Date() });
+        return newUser.save().then(async (user) => {
+          await this.inviteModel.findOneAndUpdate({ _id: inviteId }, { status: 'accepted', dateUpdated: new Date(), userId: user._id });
           await this.companyModel.findOneAndUpdate({ _id: companyId }, { accountOwner: newUser._id });
           return user.toObject();
         });
@@ -69,19 +74,29 @@ export class UsersService {
     }
   }
 
-  findAllUsers() {
+  findAllUsers(query: TQuery) {
     try {
-      const users = this.userModel.find().lean();
+      const users = this.userModel.find(query).lean();
       return users;
     } catch (ex) {
-      this.customLogger.logger(`Error in users.service userModel.find(): ${ex.message}`, ex);
+      this.customLogger.logger(`Error in users.service userModel.find: ${ex.message}`, ex);
       return [];
     }
   }
 
-  async findUser(_id: Types.ObjectId) {
+  findAllUsersAdmin() {
     try {
-      const user = await this.userModel.findOne({ _id });
+      const users = this.userModel.find().lean();
+      return users;
+    } catch (ex) {
+      this.customLogger.logger(`Error in users.service userModel.find: ${ex.message}`, ex);
+      return [];
+    }
+  }
+
+  async findUser(query: TQuery) {
+    try {
+      const user = await this.userModel.findOne(query);
       if (!user) {
         throw new NotFoundException('User not found');
       }
@@ -90,14 +105,14 @@ export class UsersService {
       if (ex.message === 'User not found') {
         throw ex;
       }
-      this.customLogger.logger(`Error in users.service userModel.findOne(${_id}): ${ex.message}`, ex);
+      this.customLogger.logger(`Error in users.service userModel.findOne: ${ex.message}`, ex);
       return null;
     }
   }
 
-  updateUser(_id: Types.ObjectId, user: Partial<UpdateUserRequestDTO>) {
+  updateUser(query: TQuery, user: Partial<UpdateUserRequestDTO>) {
     try {
-      const updatedUser = this.userModel.findOneAndUpdate({ _id }, user, { new: true }).lean();
+      const updatedUser = this.userModel.findOneAndUpdate(query, user, { new: true }).lean();
       if (!updatedUser) {
         throw new NotFoundException('User not found');
       }
@@ -106,14 +121,14 @@ export class UsersService {
       if (ex.message === 'User not found') {
         throw ex;
       }
-      this.customLogger.logger(`Error in users.service userModel.update(${_id}, ${JSON.stringify(user)}): ${ex.message}`, ex);
+      this.customLogger.logger(`Error in users.service userModel.update: ${ex.message}`, ex);
       return null;
     }
   }
 
-  removeUser(_id: Types.ObjectId) {
+  removeUser(query: TQuery) {
     try {
-      const deletedUser = this.userModel.findOneAndDelete({ _id }).lean();
+      const deletedUser = this.userModel.findOneAndDelete(query).lean();
       if (!deletedUser) {
         throw new NotFoundException('User not found');
       }
@@ -122,7 +137,7 @@ export class UsersService {
       if (ex.message === 'User not found') {
         throw ex;
       }
-      this.customLogger.logger(`Error in users.service userModel.findOneAndDelete(${_id}): ${ex.message}`, ex);
+      this.customLogger.logger(`Error in users.service userModel.findOneAndDelete: ${ex.message}`, ex);
       return null;
     }
   }

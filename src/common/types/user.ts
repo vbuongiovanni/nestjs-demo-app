@@ -8,3 +8,7 @@ export interface IUser {
   password: string;
   role: Types.ObjectId;
 }
+
+export interface IActiveUser {
+  companyId: Types.ObjectId;
+}

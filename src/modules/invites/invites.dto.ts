@@ -46,9 +46,11 @@ export class InviteResponseDto {
 
   @Expose()
   @IsNotEmpty()
+  @ConvertIdType('string')
   companyId: Types.ObjectId;
 
   @Expose()
+  @ConvertIdType('string')
   @IsOptional()
   userId: Types.ObjectId;
 

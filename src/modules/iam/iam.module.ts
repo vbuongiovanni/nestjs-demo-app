@@ -14,6 +14,7 @@ import { redisConfig } from 'src/common/config/redis.config';
 import { APP_GUARD } from '@nestjs/core';
 import { AuthGuard } from './authentication/guards';
 import { BearerGuard } from './authentication/guards/bearer.guard';
+import { AdminGuard } from './authentication/guards/admin.guard';
 import { PermissionGuard } from './authorization/Permissions.guard';
 
 @Module({
@@ -33,6 +34,7 @@ import { PermissionGuard } from './authorization/Permissions.guard';
     CustomLogger,
     RefreshTokenService,
     BearerGuard,
+    AdminGuard,
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: PermissionGuard },
   ],

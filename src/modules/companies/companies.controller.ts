@@ -3,8 +3,8 @@ import { CompaniesService } from './companies.service';
 import { UpdateCompanyRequestDto, CompanyResponseDto, CreateCompanyRequestDto } from './companies.dto';
 import { plainToInstance } from 'class-transformer';
 import { Types } from 'mongoose';
-import { ObjectIdParam, ReqAuthType } from 'src/common/decorators';
-import { AuthType } from 'src/common/types';
+import { ActiveUser, ObjectIdParam, ReqAuthType } from 'src/common/decorators';
+import { AuthType, IActiveUser } from 'src/common/types';
 import { EmailService } from '../email/email.service';
 import { InviteType } from 'src/mongodb';
 import { ConfigService } from '@nestjs/config';
@@ -51,29 +51,42 @@ export class CompaniesController {
   }
 
   @Get()
-  async findAllCompanies(): Promise<CompanyResponseDto[]> {
-    const allCompanies = await this.companiesService.findAllCompanies();
+  async findAllCompanies(@ActiveUser() activeUser: IActiveUser): Promise<CompanyResponseDto[]> {
+    const { companyId } = activeUser;
+    const allCompanies = await this.companiesService.findAllCompanies({ companyId });
     return plainToInstance(CompanyResponseDto, allCompanies, { excludeExtraneousValues: true });
   }
 
-  @Get(':id')
-  async findCompany(@ObjectIdParam('id') id: Types.ObjectId): Promise<CompanyResponseDto> {
-    const company = await this.companiesService.findCompany(id);
+  @Get('/admin')
+  @ReqAuthType(AuthType.Bearer)
+  @ReqAuthType(AuthType.Admin)
+  async findAllCompaniesAdmin(): Promise<CompanyResponseDto[]> {
+    const allCompanies = await this.companiesService.findAllCompaniesAdmin();
+    return plainToInstance(CompanyResponseDto, allCompanies, { excludeExtraneousValues: true });
+  }
+
+  @Get('/:_id')
+  async findCompany(@ActiveUser() activeUser: IActiveUser, @ObjectIdParam('_id') _id: Types.ObjectId): Promise<CompanyResponseDto> {
+    const { companyId } = activeUser;
+    const company = await this.companiesService.findCompany({ companyId, _id });
     return plainToInstance(CompanyResponseDto, company, { excludeExtraneousValues: true });
   }
 
-  @Patch(':id')
+  @Patch('/:_id')
   async updateCompany(
-    @ObjectIdParam('id') id: Types.ObjectId,
+    @ActiveUser() activeUser: IActiveUser,
+    @ObjectIdParam('_id') _id: Types.ObjectId,
     @Body() updateCompanyDto: UpdateCompanyRequestDto,
   ): Promise<CompanyResponseDto> {
-    const updatedCompany = await this.companiesService.updateCompany(id, updateCompanyDto);
+    const { companyId } = activeUser;
+    const updatedCompany = await this.companiesService.updateCompany({ companyId, _id }, updateCompanyDto);
     return plainToInstance(CompanyResponseDto, updatedCompany, { excludeExtraneousValues: true });
   }
 
-  @Delete(':id')
-  async removeCompany(@ObjectIdParam('id') id: Types.ObjectId): Promise<CompanyResponseDto> {
-    const removedCompany = await this.companiesService.removeCompany(id);
+  @Delete('/:_id')
+  async removeCompany(@ActiveUser() activeUser: IActiveUser, @ObjectIdParam('_id') _id: Types.ObjectId): Promise<CompanyResponseDto> {
+    const { companyId } = activeUser;
+    const removedCompany = await this.companiesService.removeCompany({ companyId, _id });
     return plainToInstance(CompanyResponseDto, removedCompany, { excludeExtraneousValues: true });
   }
 }

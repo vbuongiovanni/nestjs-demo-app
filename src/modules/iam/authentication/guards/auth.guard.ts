@@ -3,12 +3,14 @@ import { Reflector } from '@nestjs/core';
 import { AuthType } from '../../../../common/types/authType';
 import { BearerGuard } from './bearer.guard';
 import { REQ_AUTH_TYPE_KEY } from '../../../../common/decorators/reqAuthType.decorator';
+import { AdminGuard } from './admin.guard';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     private readonly reflector: Reflector,
     private readonly bearerGuard: BearerGuard,
+    private readonly adminGuard: AdminGuard,
   ) {}
 
   private static readonly defaultAuthType = AuthType.Bearer;
@@ -16,6 +18,7 @@ export class AuthGuard implements CanActivate {
   private readonly guardTypeMap: Record<AuthType, CanActivate> = {
     [AuthType.Public]: { canActivate: () => true },
     [AuthType.Bearer]: this.bearerGuard,
+    [AuthType.Admin]: this.adminGuard,
   };
 
   async canActivate(context: ExecutionContext): Promise<boolean> {

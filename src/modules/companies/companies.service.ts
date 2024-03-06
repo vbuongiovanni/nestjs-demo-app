@@ -6,6 +6,7 @@ import { Model, Types } from 'mongoose';
 import { CustomLogger } from 'src/logger/custom-logger.service';
 import { InvitesService } from '../invites/invites.service';
 import { CreateWelcomeAboardInviteRequestDto } from '../invites/invites.dto';
+import { TQuery } from 'src/common/types/query';
 
 @Injectable()
 export class CompaniesService {
@@ -37,7 +38,17 @@ export class CompaniesService {
     }
   }
 
-  async findAllCompanies() {
+  async findAllCompanies(query: TQuery) {
+    try {
+      const allCompanies = await this.companyModel.find(query).lean();
+      return allCompanies;
+    } catch (ex) {
+      this.customLogger.logger(`Error in companies.service.findAllCompanies(): ${ex.message}`, ex);
+      return null;
+    }
+  }
+
+  async findAllCompaniesAdmin() {
     try {
       const allCompanies = await this.companyModel.find().lean();
       return allCompanies;
@@ -47,9 +58,9 @@ export class CompaniesService {
     }
   }
 
-  async findCompany(_id: Types.ObjectId) {
+  async findCompany(query: TQuery) {
     try {
-      const company = await this.companyModel.findOne({ _id }).lean();
+      const company = await this.companyModel.findOne(query).lean();
       return company;
     } catch (ex) {
       this.customLogger.logger(`Error in companies.service.findCompany(): ${ex.message}`, ex);
@@ -57,9 +68,9 @@ export class CompaniesService {
     }
   }
 
-  async updateCompany(_id: Types.ObjectId, updateCompanyBody: UpdateCompanyRequestDto) {
+  async updateCompany(query: TQuery, updateCompanyBody: UpdateCompanyRequestDto) {
     try {
-      const updateCompany = await this.companyModel.findOneAndUpdate({ _id }, updateCompanyBody, { new: true }).lean();
+      const updateCompany = await this.companyModel.findOneAndUpdate(query, updateCompanyBody, { new: true }).lean();
       return updateCompany;
     } catch (ex) {
       this.customLogger.logger(`Error in companies.service.updateCompany(): ${ex.message}`, ex);
@@ -67,9 +78,9 @@ export class CompaniesService {
     }
   }
 
-  async removeCompany(_id: Types.ObjectId) {
+  async removeCompany(query: TQuery) {
     try {
-      await this.companyModel.findOneAndDelete({ _id }).lean();
+      await this.companyModel.findOneAndDelete(query).lean();
       return 'Success';
     } catch (ex) {
       this.customLogger.logger(`Error in companies.service.removeCompany(): ${ex.message}`, ex);

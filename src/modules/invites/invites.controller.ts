@@ -2,8 +2,8 @@ import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/commo
 import { InvitesService } from './invites.service';
 import { CreateInviteRequestDto, UpdateInviteRequestDto, InviteResponseDto } from './invites.dto';
 import { plainToInstance } from 'class-transformer';
-import { ObjectIdParam, ReqAuthType } from 'src/common/decorators';
-import { AuthType } from 'src/common/types';
+import { ActiveUser, ObjectIdParam, ReqAuthType } from 'src/common/decorators';
+import { AuthType, IActiveUser } from 'src/common/types';
 import { Types } from 'mongoose';
 
 @Controller('invites')
@@ -17,21 +17,42 @@ export class InvitesController {
   }
 
   @Get()
-  async findInvites() {
-    const invites = await this.invitesService.findAllInvites();
+  async findInvites(@ActiveUser() activeUser: IActiveUser) {
+    const { companyId } = activeUser;
+    const invites = await this.invitesService.findAllInvites({ companyId });
     return plainToInstance(InviteResponseDto, invites, { excludeExtraneousValues: true });
+  }
+
+  @Get('/admin')
+  @ReqAuthType(AuthType.Bearer)
+  @ReqAuthType(AuthType.Admin)
+  async findAllInvitesAdmin() {
+    const invites = await this.invitesService.findAllInvitesAdmin();
+    return plainToInstance(InviteResponseDto, invites, { excludeExtraneousValues: true });
+  }
+
+  @Get('/:_id')
+  async findInvite(@ActiveUser() activeUser: IActiveUser, @ObjectIdParam('_id') _id: Types.ObjectId) {
+    const { companyId } = activeUser;
+    const invites = await this.invitesService.findInvite({ companyId, _id });
+    return plainToInstance(InviteResponseDto, invites, { excludeExtraneousValues: true });
+  }
+
+  @Patch('/:_id')
+  async updateInvite(
+    @ActiveUser() activeUser: IActiveUser,
+    @ObjectIdParam('_id') _id: Types.ObjectId,
+    @Body() updateInviteBody: UpdateInviteRequestDto,
+  ) {
+    const { companyId } = activeUser;
+    const updatedInvite = await this.invitesService.updateInvite({ companyId, _id }, updateInviteBody);
+    return plainToInstance(InviteResponseDto, updatedInvite, { excludeExtraneousValues: true });
   }
 
   @ReqAuthType(AuthType.Public)
-  @Get('/:companyId/:linkId')
-  async findInvite(@ObjectIdParam('companyId') companyId: Types.ObjectId, @Param('linkId') linkId: string) {
-    const invites = await this.invitesService.findInvite(companyId, linkId);
+  @Get('/:companyId/:link')
+  async getInvite(@ObjectIdParam('companyId') companyId: Types.ObjectId, @Param('link') link: string) {
+    const invites = await this.invitesService.findInvite({ companyId, link });
     return plainToInstance(InviteResponseDto, invites, { excludeExtraneousValues: true });
-  }
-
-  @Patch(':id')
-  async updateInvite(@Param('id') id: string, @Body() updateInviteBody: UpdateInviteRequestDto) {
-    const updatedInvite = await this.invitesService.updateInvite(id, updateInviteBody);
-    return plainToInstance(InviteResponseDto, updatedInvite, { excludeExtraneousValues: true });
   }
 }
