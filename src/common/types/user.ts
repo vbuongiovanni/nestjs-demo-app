@@ -10,5 +10,6 @@ export interface IUser {
 }
 
 export interface IActiveUser {
+  userId: Types.ObjectId;
   companyId: Types.ObjectId;
 }

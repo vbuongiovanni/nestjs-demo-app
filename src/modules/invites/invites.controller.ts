@@ -52,7 +52,7 @@ export class InvitesController {
   @ReqAuthType(AuthType.Public)
   @Get('/:companyId/:link')
   async getInvite(@ObjectIdParam('companyId') companyId: Types.ObjectId, @Param('link') link: string) {
-    const invites = await this.invitesService.findInvite({ companyId, link });
-    return plainToInstance(InviteResponseDto, invites, { excludeExtraneousValues: true });
+    const invite = await this.invitesService.findInvite({ companyId, link });
+    return plainToInstance(InviteResponseDto, invite, { excludeExtraneousValues: true });
   }
 }

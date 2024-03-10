@@ -43,7 +43,38 @@ export class InvitesService {
   }
   async findInvite(query: { _id?: Types.ObjectId; companyId?: Types.ObjectId; link?: string }) {
     try {
-      return await this.inviteModel.findOne(query).lean();
+      const [invite] = await this.inviteModel.aggregate([
+        { $match: query },
+        {
+          $lookup: {
+            from: 'users',
+            localField: 'userId',
+            foreignField: '_id',
+            as: 'fullName',
+            pipeline: [{ $project: { firstName: 1, lastName: 1, email: 1, _id: 0 } }],
+          },
+        },
+        {
+          $lookup: {
+            from: 'companies',
+            localField: 'companyId',
+            foreignField: '_id',
+            as: 'companyName',
+            pipeline: [{ $project: { name: 1, _id: 0 } }],
+          },
+        },
+        { $unwind: '$fullName' },
+        { $unwind: '$companyName' },
+        {
+          $addFields: {
+            fullName: { $concat: ['$fullName.firstName', ' ', '$fullName.lastName'] },
+            email: '$fullName.email',
+            companyName: '$companyName.name',
+          },
+        },
+        { $limit: 1 },
+      ]);
+      return invite;
     } catch (ex) {
       this.customLogger.logger(`Error in invites.service.findInvite(): ${ex.message}`, ex);
       return null;

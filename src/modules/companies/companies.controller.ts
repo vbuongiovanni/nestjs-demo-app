@@ -20,33 +20,9 @@ export class CompaniesController {
   ) {}
 
   @Post('/register')
+  @ReqAuthType(AuthType.Admin)
   async registerNewCompany(@Body() registerNewCompanyDto: CreateCompanyRequestDto) {
-    const url = this.configService.get<string>('FRONTEND_URL');
-    const { companyName, firstName, lastName, email } = registerNewCompanyDto;
-    const newCompany = await this.companiesService.createCompany(companyName);
-    const companyId = newCompany._id;
-    const createInviteDto = {
-      companyId: companyId,
-      type: InviteType.welcomeAboard,
-    };
-    const invite = await this.companiesService.createWelcomeAboardInvite(createInviteDto);
-
-    const emailData = {
-      email,
-      firstName,
-      lastName,
-      companyName,
-      content: {
-        type: TemplateType.welcomeAboard,
-        context: {
-          link: `${url}/register/${companyId}/${invite.link}`,
-          name: `${firstName} ${lastName}`,
-        },
-      },
-    };
-
-    await this.emailService.sendMail(emailData);
-
+    const newCompany = await this.companiesService.registerNewCompany(registerNewCompanyDto);
     return plainToInstance(CompanyResponseDto, newCompany, { excludeExtraneousValues: true });
   }
 
@@ -58,7 +34,6 @@ export class CompaniesController {
   }
 
   @Get('/admin')
-  @ReqAuthType(AuthType.Bearer)
   @ReqAuthType(AuthType.Admin)
   async findAllCompaniesAdmin(): Promise<CompanyResponseDto[]> {
     const allCompanies = await this.companiesService.findAllCompaniesAdmin();

@@ -62,7 +62,7 @@ export class RolesService {
     try {
       const role = await this.roleModel.findOne({ _id }).lean();
       if (role) {
-        const users = await this.userModel.find({ companyId: role.companyId }).lean();
+        const users = await this.userModel.find({ role: _id }).lean();
         const usersWithRole = users.filter((user) => user.roleId === _id);
         if (usersWithRole.length > 0) {
           throw new Error(errorMessage);

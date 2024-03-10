@@ -1,6 +1,7 @@
 import { Expose } from 'class-transformer';
 import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 import { ConvertIdType } from '../../common/decorators';
+import { Types } from 'mongoose';
 
 export class CreateUserRequestDTO {
   @IsNotEmpty()
@@ -45,6 +46,14 @@ export class CreateAccountOwnerRequestDTO {
 
   @IsNotEmpty()
   password: string;
+}
+
+export class RespondToInviteDTO {
+  @IsNotEmpty()
+  linkId: string;
+
+  @IsNotEmpty()
+  action: 'accept' | 'reject';
 }
 
 export class UpdateUserRequestDTO {

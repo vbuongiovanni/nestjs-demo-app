@@ -8,9 +8,6 @@ export type RoleDocument = HydratedDocument<Role>;
 @Schema({ collection: SchemaName.Role })
 export class Role {
   @Prop({ required: true })
-  companyId: Types.ObjectId;
-
-  @Prop({ required: true })
   name: string;
 
   @Prop({ type: [String], default: [] })

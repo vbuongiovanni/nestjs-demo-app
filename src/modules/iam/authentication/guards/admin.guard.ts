@@ -6,7 +6,12 @@ import { Request } from 'express';
 
 @Injectable()
 export class AdminGuard implements CanActivate {
-  constructor(@Inject(ConfigService) private readonly configService: ConfigService) {}
+  constructor(
+    @Inject(JwtService) private readonly jwtService: JwtService,
+    @Inject(ConfigService) private readonly configService: ConfigService,
+    @Inject(jwtConfig.KEY)
+    private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
+  ) {}
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const res = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(res);
@@ -15,7 +20,7 @@ export class AdminGuard implements CanActivate {
       throw new UnauthorizedException();
     } else {
       try {
-        const payload = res['user'];
+        const payload = await this.jwtService.verifyAsync(token, this.jwtConfiguration);
         if (payload.companyId !== ADMIN_CO) {
           throw new UnauthorizedException();
         }
