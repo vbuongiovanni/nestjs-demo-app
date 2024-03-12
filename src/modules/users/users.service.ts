@@ -92,7 +92,7 @@ export class UsersService {
         { $unwind: '$role' },
       ]);
 
-      return { ...user, userCompanyRoles };
+      return { user, userCompanyRoles };
     } catch (ex) {
       if (ex.message === 'User not found') {
         throw ex;

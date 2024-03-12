@@ -34,25 +34,21 @@ export class RoleResponseDto {
 }
 
 export class UserCompanyRoleResponseDto {
-  @IsNotEmpty()
   @Expose()
   @ConvertIdType('string')
   _id: string;
 
-  @IsNotEmpty()
   @Expose()
   @ConvertIdType('string')
   userId: string;
 
-  @IsNotEmpty()
   @Expose()
-  // WHY IS THIS CHANGING THE _ID!?!?!?!
+  @ConvertIdType('string')
   companyId: string;
 
   @Expose()
   isAccountOwner: boolean;
 
-  @IsNotEmpty()
   @Expose()
   @ValidateNested()
   role: RoleResponseDto;

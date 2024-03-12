@@ -1,18 +1,12 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, Req } from '@nestjs/common';
 import { HashPasswordPipe } from '../../common/pipes/hash-password.pipe';
 import { UsersService } from './users.service';
-import {
-  ActiveUserResponseDTO,
-  CreateAccountOwnerRequestDTO,
-  CreateUserRequestDTO,
-  RespondToInviteDTO,
-  UpdateUserRequestDTO,
-  UserResponseDTO,
-} from './user.dto';
+import { CreateAccountOwnerRequestDTO, CreateUserRequestDTO, RespondToInviteDTO, UpdateUserRequestDTO, UserResponseDTO } from './user.dto';
 import { plainToInstance } from 'class-transformer';
 import { Types } from 'mongoose';
 import { ActiveUser, ObjectIdParam, ReqAuthType } from 'src/common/decorators';
 import { AuthType, IActiveUser } from 'src/common/types';
+import { UserCompanyRoleResponseDto } from '../roles/roles.dto';
 
 @Controller('users')
 @ReqAuthType(AuthType.Bearer)
@@ -49,14 +43,15 @@ export class UsersController {
   }
 
   @Get('/activeUser')
-  async findActiveUser(@ActiveUser() activeUser: IActiveUser, @ObjectIdParam('_id') _id: Types.ObjectId): Promise<ActiveUserResponseDTO> {
+  async findActiveUser(@ActiveUser() activeUser: IActiveUser, @ObjectIdParam('_id') _id: Types.ObjectId) {
     const companies: Types.ObjectId[] = activeUser.companies || [];
     const userId = activeUser.userId;
-    const activeUserRes = await this.usersService.findActiveUser({ $and: [{ _id: userId }, { companies: { $in: companies } }] });
-    const trans = plainToInstance(ActiveUserResponseDTO, activeUserRes, { excludeExtraneousValues: true });
-    console.log(trans.userCompanyRoles[0].companyId);
-    console.log(trans.userCompanyRoles[1].companyId);
-    return trans;
+    const { user, userCompanyRoles } = await this.usersService.findActiveUser({
+      $and: [{ _id: userId }, { companies: { $in: companies } }],
+    });
+    const userDto = plainToInstance(UserResponseDTO, user, { excludeExtraneousValues: true });
+    const userCompanyRolesDto = plainToInstance(UserCompanyRoleResponseDto, userCompanyRoles, { excludeExtraneousValues: true });
+    return { ...userDto, userCompanyRoles: userCompanyRolesDto };
   }
 
   @Get('/admin')

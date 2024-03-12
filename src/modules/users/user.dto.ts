@@ -100,31 +100,3 @@ export class UserResponseDTO {
   @Expose()
   email: string;
 }
-export class ActiveUserResponseDTO {
-  @IsNotEmpty()
-  @Expose()
-  @ConvertIdType('string')
-  _id: string;
-
-  @IsNotEmpty()
-  @Expose()
-  @ConvertIdType('string', true)
-  companies: string;
-
-  @IsNotEmpty()
-  @Expose()
-  firstName: string;
-
-  @IsNotEmpty()
-  @Expose()
-  lastName: string;
-
-  @IsNotEmpty()
-  @IsEmail()
-  @Expose()
-  email: string;
-
-  @ValidateNested({ each: true })
-  @Expose()
-  userCompanyRoles: UserCompanyRoleResponseDto[];
-}

@@ -21,7 +21,7 @@ export class RolesService {
 
   async findAllUserCompanyRoles(query: TQuery) {
     try {
-      const userCompanyRoles = await this.userCompanyModel.aggregate([
+      const userCompanyRoles = (await this.userCompanyModel.aggregate([
         { $match: query },
         {
           $lookup: {
@@ -32,8 +32,8 @@ export class RolesService {
           },
         },
         { $unwind: '$role' },
-      ]);
-      return userCompanyRoles as UserCompaniesDocument[];
+      ])) as UserCompaniesDocument[];
+      return userCompanyRoles;
     } catch (ex) {
       this.customLogger.logger(`Error in roles.service.findAllUserCompanyRoles(): ${ex.message}`, ex);
       return null;
