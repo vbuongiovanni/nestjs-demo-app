@@ -56,7 +56,11 @@ export class InviteResponseDto {
 
   @Expose()
   @IsOptional()
-  fullName: string;
+  firstName: string;
+
+  @Expose()
+  @IsOptional()
+  lastName: string;
 
   @Expose()
   @IsOptional()

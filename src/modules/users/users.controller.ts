@@ -1,7 +1,14 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, Req } from '@nestjs/common';
 import { HashPasswordPipe } from '../../common/pipes/hash-password.pipe';
 import { UsersService } from './users.service';
-import { CreateAccountOwnerRequestDTO, CreateUserRequestDTO, RespondToInviteDTO, UpdateUserRequestDTO, UserResponseDTO } from './user.dto';
+import {
+  ActiveUserResponseDTO,
+  CreateAccountOwnerRequestDTO,
+  CreateUserRequestDTO,
+  RespondToInviteDTO,
+  UpdateUserRequestDTO,
+  UserResponseDTO,
+} from './user.dto';
 import { plainToInstance } from 'class-transformer';
 import { Types } from 'mongoose';
 import { ActiveUser, ObjectIdParam, ReqAuthType } from 'src/common/decorators';
@@ -41,25 +48,36 @@ export class UsersController {
     return plainToInstance(UserResponseDTO, newUser, { excludeExtraneousValues: true });
   }
 
+  @Get('/activeUser')
+  async findActiveUser(@ActiveUser() activeUser: IActiveUser, @ObjectIdParam('_id') _id: Types.ObjectId): Promise<ActiveUserResponseDTO> {
+    const companies: Types.ObjectId[] = activeUser.companies || [];
+    const userId = activeUser.userId;
+    const activeUserRes = await this.usersService.findActiveUser({ $and: [{ _id: userId }, { companies: { $in: companies } }] });
+    const trans = plainToInstance(ActiveUserResponseDTO, activeUserRes, { excludeExtraneousValues: true });
+    console.log(trans.userCompanyRoles[0].companyId);
+    console.log(trans.userCompanyRoles[1].companyId);
+    return trans;
+  }
+
   @Get('/admin')
   @ReqAuthType(AuthType.Bearer)
   @ReqAuthType(AuthType.Admin)
-  async findAllUsersAdmin(@ActiveUser() activeUser: IActiveUser): Promise<UserResponseDTO[]> {
+  async findAllUsersAdmin(): Promise<UserResponseDTO[]> {
     const users = await this.usersService.findAllUsersAdmin();
     return plainToInstance(UserResponseDTO, users, { excludeExtraneousValues: true });
   }
 
   @Get()
   async findAllUsers(@ActiveUser() activeUser: IActiveUser): Promise<UserResponseDTO[]> {
-    const companyId = activeUser.companyId;
-    const users = await this.usersService.findAllUsers({ companyId });
+    const companies: Types.ObjectId[] = activeUser.companies || [];
+    const users = await this.usersService.findAllUsers({ companies: { $in: companies } });
     return plainToInstance(UserResponseDTO, users, { excludeExtraneousValues: true });
   }
 
   @Get('/:_id')
   async findUser(@ActiveUser() activeUser: IActiveUser, @ObjectIdParam('_id') _id: Types.ObjectId): Promise<UserResponseDTO> {
-    const companyId = activeUser.companyId;
-    const user = await this.usersService.findUser({ companyId, _id });
+    const companies: Types.ObjectId[] = activeUser.companies || [];
+    const user = await this.usersService.findUser({ $and: [{ _id }, { companies: { $in: companies } }] });
     return plainToInstance(UserResponseDTO, user, { excludeExtraneousValues: true });
   }
 
@@ -69,15 +87,15 @@ export class UsersController {
     @ObjectIdParam('_id') _id: Types.ObjectId,
     @Body() updateUserBody: Partial<UpdateUserRequestDTO>,
   ): Promise<UserResponseDTO> {
-    const companyId = activeUser.companyId;
-    const updatedUser = this.usersService.updateUser({ companyId, _id }, updateUserBody);
+    const companies: Types.ObjectId[] = activeUser.companies || [];
+    const updatedUser = this.usersService.updateUser({ $and: [{ _id }, { companies: { $in: companies } }] }, updateUserBody);
     return plainToInstance(UserResponseDTO, updatedUser, { excludeExtraneousValues: true });
   }
 
   @Delete('/:_id')
   async removeUser(@ActiveUser() activeUser: IActiveUser, @ObjectIdParam('_id') _id: Types.ObjectId): Promise<UserResponseDTO> {
-    const companyId = activeUser.companyId;
-    await this.usersService.removeUser({ companyId, _id });
+    const companies: Types.ObjectId[] = activeUser.companies || [];
+    await this.usersService.removeUser({ $and: [{ _id }, { companies: { $in: companies } }] });
     return undefined;
   }
 }

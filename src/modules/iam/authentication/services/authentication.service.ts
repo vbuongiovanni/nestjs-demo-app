@@ -42,10 +42,10 @@ export class AuthService {
 
   private async generateTokens(user: IUser) {
     const refreshTokenId = randomUUID();
-    const { email, _id, companyId, role } = user;
+    const { email, _id, companies, role } = user;
     const userId = _id.toString();
     const [accessToken, refreshToken] = await Promise.all([
-      this.signToken(userId, this.jwtConfiguration.accessTokenTtl, { email, companyId, role }),
+      this.signToken(userId, this.jwtConfiguration.accessTokenTtl, { email, companies, role }),
       this.signToken(refreshTokenId, this.jwtConfiguration.refreshTokenTtl, { userId, refreshTokenId }),
     ]);
     await this.refreshTokenService.insert(userId, refreshTokenId);
@@ -68,9 +68,9 @@ export class AuthService {
     }
   }
 
-  async register(companyId: Types.ObjectId, registerBody: RegisterRequestDTO) {
+  async register(registerBody: RegisterRequestDTO) {
     const hashedPassword = await this.hashingService.hash(registerBody.password);
-    const newUser = new this.userModel({ ...registerBody, password: hashedPassword, companyId });
+    const newUser = new this.userModel({ ...registerBody, password: hashedPassword, companies: [] });
     return newUser
       .save()
       .then((user) => {

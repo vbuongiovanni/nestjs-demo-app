@@ -1,21 +1,30 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
 import { RolesService } from './roles.service';
-import { CreateRoleRequestDto, UpdateRoleRequestDto, RoleResponseDto } from './roles.dto';
+import { CreateRoleRequestDto, UpdateRoleRequestDto, RoleResponseDto, UserCompanyRoleResponseDto } from './roles.dto';
 import { plainToInstance } from 'class-transformer';
 import { Types } from 'mongoose';
 import { ActiveUser, ReqAuthType } from 'src/common/decorators';
-import { AuthType, IUser } from 'src/common/types';
+import { AuthType, IActiveUser, IUser } from 'src/common/types';
 import { ObjectIdParam } from 'src/common/decorators';
 
 @Controller('roles')
+@ReqAuthType(AuthType.Bearer)
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
 
   @Post()
-  async createRole(@ActiveUser() user: IUser, @Body() createRoleBody: CreateRoleRequestDto): Promise<RoleResponseDto> {
-    const companyId = new Types.ObjectId(user.companyId);
-    const newRole = await this.rolesService.createRole(companyId, createRoleBody);
+  @ReqAuthType(AuthType.Bearer)
+  @ReqAuthType(AuthType.Admin)
+  async createRole(@Body() createRoleBody: CreateRoleRequestDto): Promise<RoleResponseDto> {
+    const newRole = await this.rolesService.createRole(createRoleBody);
     return plainToInstance(RoleResponseDto, newRole, { excludeExtraneousValues: true });
+  }
+
+  @Get('/userCompanyRoles')
+  async findAllUserCompanyRoles(@ActiveUser() activeUser: IActiveUser): Promise<UserCompanyRoleResponseDto[]> {
+    const companies: Types.ObjectId[] = activeUser.companies || [];
+    const role = await this.rolesService.findAllUserCompanyRoles({ companyId: { $in: companies } });
+    return plainToInstance(UserCompanyRoleResponseDto, role, { excludeExtraneousValues: true });
   }
 
   @Get()
@@ -24,22 +33,24 @@ export class RolesController {
     return plainToInstance(RoleResponseDto, allRoles, { excludeExtraneousValues: true });
   }
 
-  @Get(':id')
-  @ReqAuthType(AuthType.Public)
-  async findRole(@ObjectIdParam('id') id: Types.ObjectId): Promise<RoleResponseDto> {
-    const role = await this.rolesService.findRole(id);
+  @Get(':roleId')
+  async findRole(@ObjectIdParam('roleId') roleId: Types.ObjectId): Promise<RoleResponseDto> {
+    const role = await this.rolesService.findRole(roleId);
     return plainToInstance(RoleResponseDto, role, { excludeExtraneousValues: true });
   }
 
-  @Patch(':id')
-  async updateRole(@ObjectIdParam('id') id: Types.ObjectId, @Body() updateRoleBody: UpdateRoleRequestDto): Promise<RoleResponseDto> {
-    const updatedRole = this.rolesService.updateRole(id, updateRoleBody);
+  @Patch(':roleId')
+  async updateRole(
+    @ObjectIdParam('roleId') roleId: Types.ObjectId,
+    @Body() updateRoleBody: UpdateRoleRequestDto,
+  ): Promise<RoleResponseDto> {
+    const updatedRole = this.rolesService.updateRole(roleId, updateRoleBody);
     return plainToInstance(RoleResponseDto, updatedRole, { excludeExtraneousValues: true });
   }
 
-  @Delete(':id')
-  async removeRole(@ObjectIdParam('id') id: Types.ObjectId): Promise<RoleResponseDto> {
-    const removedRole = this.rolesService.removeRole(id);
+  @Delete(':roleId')
+  async removeRole(@ObjectIdParam('roleId') roleId: Types.ObjectId): Promise<RoleResponseDto> {
+    const removedRole = this.rolesService.removeRole(roleId);
     return plainToInstance(RoleResponseDto, removedRole, { excludeExtraneousValues: true });
   }
 }

@@ -18,8 +18,8 @@ export class InvitesController {
 
   @Get()
   async findInvites(@ActiveUser() activeUser: IActiveUser) {
-    const { companyId } = activeUser;
-    const invites = await this.invitesService.findAllInvites({ companyId });
+    const companies: Types.ObjectId[] = activeUser.companies || [];
+    const invites = await this.invitesService.findAllInvites({ companies: { $in: companies } });
     return plainToInstance(InviteResponseDto, invites, { excludeExtraneousValues: true });
   }
 
@@ -33,8 +33,8 @@ export class InvitesController {
 
   @Get('/:_id')
   async findInvite(@ActiveUser() activeUser: IActiveUser, @ObjectIdParam('_id') _id: Types.ObjectId) {
-    const { companyId } = activeUser;
-    const invites = await this.invitesService.findInvite({ companyId, _id });
+    const companies: Types.ObjectId[] = activeUser.companies || [];
+    const invites = await this.invitesService.findInvite({ $and: [{ _id }, { companies: { $in: companies } }] });
     return plainToInstance(InviteResponseDto, invites, { excludeExtraneousValues: true });
   }
 
@@ -44,15 +44,15 @@ export class InvitesController {
     @ObjectIdParam('_id') _id: Types.ObjectId,
     @Body() updateInviteBody: UpdateInviteRequestDto,
   ) {
-    const { companyId } = activeUser;
-    const updatedInvite = await this.invitesService.updateInvite({ companyId, _id }, updateInviteBody);
+    const companies: Types.ObjectId[] = activeUser.companies || [];
+    const updatedInvite = await this.invitesService.updateInvite({ $and: [{ _id }, { companies: { $in: companies } }] }, updateInviteBody);
     return plainToInstance(InviteResponseDto, updatedInvite, { excludeExtraneousValues: true });
   }
 
   @ReqAuthType(AuthType.Public)
   @Get('/:companyId/:link')
   async getInvite(@ObjectIdParam('companyId') companyId: Types.ObjectId, @Param('link') link: string) {
-    const invite = await this.invitesService.findInvite({ companyId, link });
+    const invite = await this.invitesService.findInvite({ companyId, link, status: 'pending' });
     return plainToInstance(InviteResponseDto, invite, { excludeExtraneousValues: true });
   }
 }

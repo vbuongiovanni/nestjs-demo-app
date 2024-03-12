@@ -1,7 +1,8 @@
-import { Expose } from 'class-transformer';
-import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
+import { Exclude, Expose } from 'class-transformer';
+import { IsEmail, IsNotEmpty, IsOptional, ValidateNested } from 'class-validator';
 import { ConvertIdType } from '../../common/decorators';
 import { Types } from 'mongoose';
+import { RoleResponseDto, UserCompanyRoleResponseDto } from '../roles/roles.dto';
 
 export class CreateUserRequestDTO {
   @IsNotEmpty()
@@ -29,7 +30,8 @@ export class CreateAccountOwnerRequestDTO {
   linkId: string;
 
   @IsNotEmpty()
-  companyId: string;
+  @ConvertIdType('objectId')
+  companyId: Types.ObjectId;
 
   @IsNotEmpty()
   firstName: string;
@@ -82,13 +84,32 @@ export class UserResponseDTO {
 
   @IsNotEmpty()
   @Expose()
-  @ConvertIdType('string')
-  companyId: string;
+  @ConvertIdType('string', true)
+  companies: string;
 
   @IsNotEmpty()
   @Expose()
+  firstName: string;
+
+  @IsNotEmpty()
+  @Expose()
+  lastName: string;
+
+  @IsNotEmpty()
+  @IsEmail()
+  @Expose()
+  email: string;
+}
+export class ActiveUserResponseDTO {
+  @IsNotEmpty()
+  @Expose()
   @ConvertIdType('string')
-  roleId: string;
+  _id: string;
+
+  @IsNotEmpty()
+  @Expose()
+  @ConvertIdType('string', true)
+  companies: string;
 
   @IsNotEmpty()
   @Expose()
@@ -103,6 +124,7 @@ export class UserResponseDTO {
   @Expose()
   email: string;
 
+  @ValidateNested({ each: true })
   @Expose()
-  isCompanyAdmin: boolean;
+  userCompanyRoles: UserCompanyRoleResponseDto[];
 }

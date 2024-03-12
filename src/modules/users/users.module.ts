@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Company, CompanySchema, Invite, InviteSchema, Role, RoleSchema, User, UserSchema } from '../../mongodb';
 import { ConfigService } from '@nestjs/config';
 import { LoggerModule } from '../../logger/logger.module';
+import { UserCompanies, UserCompaniesSchema } from 'src/mongodb/schemas/user-companies';
 
 @Module({
   imports: [
@@ -13,6 +14,7 @@ import { LoggerModule } from '../../logger/logger.module';
       { name: Invite.name, schema: InviteSchema },
       { name: Role.name, schema: RoleSchema },
       { name: Company.name, schema: CompanySchema },
+      { name: UserCompanies.name, schema: UserCompaniesSchema },
     ]),
     LoggerModule,
   ],

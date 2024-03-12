@@ -15,6 +15,7 @@ export class InvitesService {
   ) {
     this.customLogger.setContext('InvitesService');
   }
+
   async createInvite(createInviteBody: CreateInviteRequestDto | CreateWelcomeAboardInviteRequestDto) {
     try {
       const link = randomUUID();
@@ -25,6 +26,7 @@ export class InvitesService {
       return null;
     }
   }
+
   async findAllInvitesAdmin() {
     try {
       return await this.inviteModel.find().lean();
@@ -33,6 +35,7 @@ export class InvitesService {
       return null;
     }
   }
+
   async findAllInvites(query: TQuery) {
     try {
       return await this.inviteModel.find(query).lean();
@@ -41,19 +44,11 @@ export class InvitesService {
       return null;
     }
   }
-  async findInvite(query: { _id?: Types.ObjectId; companyId?: Types.ObjectId; link?: string }) {
+
+  async findInvite(query: { _id?: Types.ObjectId; companyId?: Types.ObjectId; link?: string; status: 'pending' } | TQuery) {
     try {
       const [invite] = await this.inviteModel.aggregate([
         { $match: query },
-        {
-          $lookup: {
-            from: 'users',
-            localField: 'userId',
-            foreignField: '_id',
-            as: 'fullName',
-            pipeline: [{ $project: { firstName: 1, lastName: 1, email: 1, _id: 0 } }],
-          },
-        },
         {
           $lookup: {
             from: 'companies',
@@ -63,12 +58,9 @@ export class InvitesService {
             pipeline: [{ $project: { name: 1, _id: 0 } }],
           },
         },
-        { $unwind: '$fullName' },
         { $unwind: '$companyName' },
         {
           $addFields: {
-            fullName: { $concat: ['$fullName.firstName', ' ', '$fullName.lastName'] },
-            email: '$fullName.email',
             companyName: '$companyName.name',
           },
         },
@@ -80,6 +72,7 @@ export class InvitesService {
       return null;
     }
   }
+
   async updateInvite(query: TQuery, updateInviteBody: UpdateInviteRequestDto) {
     try {
       const updateCompany = await this.inviteModel.findOneAndUpdate(query, updateInviteBody, { new: true }).lean();

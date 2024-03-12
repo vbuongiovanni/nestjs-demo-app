@@ -1,8 +1,9 @@
 export enum SchemaName {
   Auth = 'auth',
   Company = 'companies',
-  User = 'users',
-  Role = 'roles',
-  RequestLogger = 'request-logger',
   Invite = 'invites',
+  RequestLogger = 'request-logger',
+  UserCompanies = 'user-companies',
+  Role = 'roles',
+  User = 'users',
 }

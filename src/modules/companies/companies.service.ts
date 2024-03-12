@@ -96,6 +96,9 @@ export class CompaniesService {
       const createInviteDto = {
         companyId,
         userId,
+        firstName,
+        lastName,
+        email,
         type: InviteType.welcomeAboard,
       };
       const invite = await this.invitesService.createInvite(createInviteDto);

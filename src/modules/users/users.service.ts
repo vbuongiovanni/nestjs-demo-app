@@ -6,11 +6,10 @@ import { Company, CompanyDocument, Invite, InviteDocument, Role, RoleDocument, U
 import { CustomLogger } from '../../logger/custom-logger.service';
 import { DuplicateRecordException } from 'src/common/exceptions';
 import { Types } from 'mongoose';
+import { UserCompanies, UserCompaniesDocument } from 'src/mongodb/schemas/user-companies';
+import { lookup } from 'dns';
 
-type TQuery =
-  | { companyId: Types.ObjectId; _id?: Types.ObjectId }
-  | { $and: [{ _id: Types.ObjectId }, { companyId: { $in: Types.ObjectId[] } }] }
-  | { companyId: { $in: Types.ObjectId[] } };
+type TQuery = { $and: [{ _id: Types.ObjectId }, { companies: { $in: Types.ObjectId[] } }] } | { companies: { $in: Types.ObjectId[] } };
 
 @Injectable()
 export class UsersService {
@@ -19,6 +18,7 @@ export class UsersService {
     @InjectModel(Invite.name) private readonly inviteModel: Model<InviteDocument>,
     @InjectModel(Role.name) private readonly roleModel: Model<RoleDocument>,
     @InjectModel(Company.name) private readonly companyModel: Model<CompanyDocument>,
+    @InjectModel(UserCompanies.name) private readonly userCompanyModel: Model<UserCompaniesDocument>,
     private customLogger: CustomLogger,
   ) {
     this.customLogger.setContext('UserService');
@@ -64,6 +64,35 @@ export class UsersService {
         throw new NotFoundException('User not found');
       }
       return user;
+    } catch (ex) {
+      if (ex.message === 'User not found') {
+        throw ex;
+      }
+      this.customLogger.logger(`Error in users.service userModel.findOne: ${ex.message}`, ex);
+      return null;
+    }
+  }
+
+  async findActiveUser(query: TQuery) {
+    try {
+      const user = await this.userModel.findOne(query).lean();
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+      const userCompanyRoles = await this.userCompanyModel.aggregate([
+        { $match: { userId: user._id } },
+        {
+          $lookup: {
+            from: 'roles',
+            localField: 'roleId',
+            foreignField: '_id',
+            as: 'role',
+          },
+        },
+        { $unwind: '$role' },
+      ]);
+
+      return { ...user, userCompanyRoles };
     } catch (ex) {
       if (ex.message === 'User not found') {
         throw ex;
@@ -123,8 +152,13 @@ export class UsersService {
       } else if (action === 'accept') {
         const adminRole = await this.roleModel.findOne({ name: 'Admin' });
         const adminRoleId = adminRole._id;
+        await this.userCompanyModel.create({ companyId, userId, roleId: adminRoleId, isAccountOwner: true });
         const updatedUser = await this.userModel
-          .findOneAndUpdate({ _id: userId }, { companyId, roleId: adminRoleId, isCompanyAdmin: true, isRegistered: true }, { new: true })
+          .findOneAndUpdate(
+            { _id: userId },
+            { $push: { companies: companyId }, roleId: adminRoleId, isCompanyAdmin: true, isRegistered: true },
+            { new: true },
+          )
           .lean();
         if (updatedUser) {
           await this.inviteModel.findOneAndUpdate(
@@ -146,26 +180,25 @@ export class UsersService {
 
   async createAccountOwner(_id: Types.ObjectId, newUserBody: CreateAccountOwnerRequestDTO) {
     try {
-      const { firstName, lastName, email, phone, password, linkId } = newUserBody;
-      const companyId = new Types.ObjectId(newUserBody.companyId);
+      const { firstName, lastName, email, phone, password, linkId, companyId } = newUserBody;
       const verifiedInvite = await this.inviteModel.findOne({ _id, companyId, link: linkId });
       if (verifiedInvite) {
-        const role = await this.roleModel.findOne({ name: 'Admin' });
-        const roleId = role._id;
+        const adminRole = await this.roleModel.findOne({ name: 'Admin' });
+        const adminRoleId = adminRole._id;
+
         const newUser = new this.userModel({
-          companyId,
+          companies: [companyId],
           firstName,
           lastName,
           email,
           phone,
           password,
-          isCompanyAdmin: true,
-          isRegistered: true,
-          roleId,
         });
 
         return newUser.save().then(async (user) => {
-          await this.inviteModel.findOneAndUpdate({ _id }, { status: 'accepted', dateUpdated: new Date(), userId: user._id });
+          const userId = user._id;
+          await this.userCompanyModel.create({ companyId, userId, roleId: adminRoleId, isAccountOwner: true });
+          await this.inviteModel.findOneAndUpdate({ _id }, { status: 'accepted', dateUpdated: new Date(), userId });
           await this.companyModel.findOneAndUpdate({ _id: companyId }, { accountOwner: newUser._id });
           return user.toObject();
         });

@@ -1,24 +1,48 @@
 import { Injectable, UsePipes } from '@nestjs/common';
-import { CreateRoleRequestDto, UpdateRoleRequestDto } from './roles.dto';
+import { CreateRoleRequestDto, UpdateRoleRequestDto, UserCompanyRoleResponseDto } from './roles.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Role, RoleDocument } from 'src/mongodb/schemas/role.schema';
 import { Model, Types } from 'mongoose';
 import { CustomLogger } from 'src/logger/custom-logger.service';
 import { User, UserDocument } from 'src/mongodb';
+import { UserCompanies, UserCompaniesDocument } from 'src/mongodb/schemas/user-companies';
+import { TQuery } from 'src/common/types/query';
 
 @Injectable()
 export class RolesService {
   constructor(
     @InjectModel(Role.name) private readonly roleModel: Model<RoleDocument>,
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
+    @InjectModel(UserCompanies.name) private readonly userCompanyModel: Model<UserCompaniesDocument>,
     private customLogger: CustomLogger,
   ) {
     this.customLogger.setContext('RoleService');
   }
 
-  async createRole(companyId: Types.ObjectId, createRoleDto: CreateRoleRequestDto) {
+  async findAllUserCompanyRoles(query: TQuery) {
     try {
-      const newRole = new this.roleModel({ ...createRoleDto, companyId });
+      const userCompanyRoles = await this.userCompanyModel.aggregate([
+        { $match: query },
+        {
+          $lookup: {
+            from: 'roles',
+            localField: 'roleId',
+            foreignField: '_id',
+            as: 'role',
+          },
+        },
+        { $unwind: '$role' },
+      ]);
+      return userCompanyRoles as UserCompaniesDocument[];
+    } catch (ex) {
+      this.customLogger.logger(`Error in roles.service.findAllUserCompanyRoles(): ${ex.message}`, ex);
+      return null;
+    }
+  }
+
+  async createRole(createRoleDto: CreateRoleRequestDto) {
+    try {
+      const newRole = new this.roleModel(createRoleDto);
       const savedRole = await newRole.save().then((user) => user.toObject());
       return savedRole;
     } catch (ex) {
@@ -62,7 +86,7 @@ export class RolesService {
     try {
       const role = await this.roleModel.findOne({ _id }).lean();
       if (role) {
-        const users = await this.userModel.find({ role: _id }).lean();
+        const users = await this.userCompanyModel.find({ roleId: _id }).lean();
         const usersWithRole = users.filter((user) => user.roleId === _id);
         if (usersWithRole.length > 0) {
           throw new Error(errorMessage);

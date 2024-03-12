@@ -21,7 +21,7 @@ export class AdminGuard implements CanActivate {
     } else {
       try {
         const payload = await this.jwtService.verifyAsync(token, this.jwtConfiguration);
-        if (payload.companyId !== ADMIN_CO) {
+        if (payload.companies.length && payload.companies[0] !== ADMIN_CO) {
           throw new UnauthorizedException();
         }
       } catch (ex) {

@@ -13,11 +13,7 @@ import { TemplateType } from '../email/types';
 @Controller('companies')
 @ReqAuthType(AuthType.Bearer)
 export class CompaniesController {
-  constructor(
-    private readonly configService: ConfigService,
-    private readonly companiesService: CompaniesService,
-    private readonly emailService: EmailService,
-  ) {}
+  constructor(private readonly companiesService: CompaniesService) {}
 
   @Post('/register')
   @ReqAuthType(AuthType.Admin)
@@ -28,8 +24,8 @@ export class CompaniesController {
 
   @Get()
   async findAllCompanies(@ActiveUser() activeUser: IActiveUser): Promise<CompanyResponseDto[]> {
-    const { companyId } = activeUser;
-    const allCompanies = await this.companiesService.findAllCompanies({ companyId });
+    const companies: Types.ObjectId[] = activeUser.companies || [];
+    const allCompanies = await this.companiesService.findAllCompanies({ _id: { $in: companies } });
     return plainToInstance(CompanyResponseDto, allCompanies, { excludeExtraneousValues: true });
   }
 
@@ -42,8 +38,8 @@ export class CompaniesController {
 
   @Get('/:_id')
   async findCompany(@ActiveUser() activeUser: IActiveUser, @ObjectIdParam('_id') _id: Types.ObjectId): Promise<CompanyResponseDto> {
-    const { companyId } = activeUser;
-    const company = await this.companiesService.findCompany({ companyId, _id });
+    const companies: Types.ObjectId[] = activeUser.companies || [];
+    const company = await this.companiesService.findCompany({ $and: [{ _id }, { _id: { $in: companies } }] });
     return plainToInstance(CompanyResponseDto, company, { excludeExtraneousValues: true });
   }
 
@@ -53,15 +49,18 @@ export class CompaniesController {
     @ObjectIdParam('_id') _id: Types.ObjectId,
     @Body() updateCompanyDto: UpdateCompanyRequestDto,
   ): Promise<CompanyResponseDto> {
-    const { companyId } = activeUser;
-    const updatedCompany = await this.companiesService.updateCompany({ companyId, _id }, updateCompanyDto);
+    const companies: Types.ObjectId[] = activeUser.companies || [];
+    const updatedCompany = await this.companiesService.updateCompany(
+      { $and: [{ _id }, { companies: { $in: companies } }] },
+      updateCompanyDto,
+    );
     return plainToInstance(CompanyResponseDto, updatedCompany, { excludeExtraneousValues: true });
   }
 
   @Delete('/:_id')
   async removeCompany(@ActiveUser() activeUser: IActiveUser, @ObjectIdParam('_id') _id: Types.ObjectId): Promise<CompanyResponseDto> {
-    const { companyId } = activeUser;
-    const removedCompany = await this.companiesService.removeCompany({ companyId, _id });
+    const companies: Types.ObjectId[] = activeUser.companies || [];
+    const removedCompany = await this.companiesService.removeCompany({ $and: [{ _id }, { companies: { $in: companies } }] });
     return plainToInstance(CompanyResponseDto, removedCompany, { excludeExtraneousValues: true });
   }
 }

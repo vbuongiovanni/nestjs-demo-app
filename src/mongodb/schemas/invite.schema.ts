@@ -34,6 +34,15 @@ export class Invite {
   @Prop({ type: String, enum: InviteType, required: true })
   type: InviteType;
 
+  @Prop({ type: String, required: true })
+  email: string;
+
+  @Prop({ type: String })
+  firstName: string;
+
+  @Prop({ type: String })
+  lastName: string;
+
   @Prop({ type: Date, default: () => Date.now() })
   dateInvited: Date;
 
