@@ -1,7 +1,6 @@
 enum Resource {
   Users = 'users',
-  Roles = 'roles',
-  Cats = 'cats',
+  Invites = 'invites',
 }
 
 enum Action {

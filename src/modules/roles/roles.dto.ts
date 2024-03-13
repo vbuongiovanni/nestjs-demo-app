@@ -2,7 +2,6 @@ import { Expose } from 'class-transformer';
 import { IsNotEmpty, ValidateNested } from 'class-validator';
 import { ConvertIdType } from 'src/common/decorators';
 import { TPermission } from 'src/common/types';
-import { Types } from 'mongoose';
 
 export class CreateRoleRequestDto {
   @IsNotEmpty()

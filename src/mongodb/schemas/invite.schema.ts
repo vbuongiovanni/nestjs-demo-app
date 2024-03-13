@@ -6,6 +6,7 @@ export enum InviteType {
   welcomeAboard = 'welcomeAboard',
   companyToUser = 'companyToUser',
   userToCompany = 'userToCompany',
+  userToUser = 'userToUser',
 }
 
 export enum InviteStatus {
@@ -24,6 +25,9 @@ export class Invite {
 
   @Prop({ type: Types.ObjectId, required: true })
   companyId: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, required: true })
+  roleId: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId })
   userId: Types.ObjectId;

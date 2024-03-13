@@ -1,13 +1,17 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateAccountOwnerRequestDTO, CreateUserRequestDTO, RespondToInviteDTO, UpdateUserRequestDTO } from './user.dto';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { CreateAccountUserDto, CreateUserRequestDTO, InviteUserRequestDTO, RespondToInviteDTO, UpdateUserRequestDTO } from './user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Company, CompanyDocument, Invite, InviteDocument, Role, RoleDocument, User, UserDocument } from '../../mongodb';
+import { Company, CompanyDocument, Invite, InviteDocument, InviteType, Role, RoleDocument, User, UserDocument } from '../../mongodb';
 import { CustomLogger } from '../../logger/custom-logger.service';
 import { DuplicateRecordException } from 'src/common/exceptions';
 import { Types } from 'mongoose';
 import { UserCompanies, UserCompaniesDocument } from 'src/mongodb/schemas/user-companies';
-import { lookup } from 'dns';
+import { InvitesService } from '../invites/invites.service';
+import { ConfigService } from '@nestjs/config';
+import { TMailData, TemplateType } from '../email/types';
+import { EmailService } from '../email/email.service';
+import { randomUUID } from 'crypto';
 
 type TQuery = { $and: [{ _id: Types.ObjectId }, { companies: { $in: Types.ObjectId[] } }] } | { companies: { $in: Types.ObjectId[] } };
 
@@ -19,9 +23,57 @@ export class UsersService {
     @InjectModel(Role.name) private readonly roleModel: Model<RoleDocument>,
     @InjectModel(Company.name) private readonly companyModel: Model<CompanyDocument>,
     @InjectModel(UserCompanies.name) private readonly userCompanyModel: Model<UserCompaniesDocument>,
-    private customLogger: CustomLogger,
+    private readonly configService: ConfigService,
+    private readonly invitesService: InvitesService,
+    private readonly emailService: EmailService,
+    private readonly customLogger: CustomLogger,
   ) {
     this.customLogger.setContext('UserService');
+  }
+
+  async inviteUser(user: InviteUserRequestDTO, activeUserId: Types.ObjectId, companyIds: Types.ObjectId[]) {
+    console.log(user);
+    try {
+      const url = this.configService.get<string>('FRONTEND_URL');
+      const { firstName, lastName, email, companyId, roleId } = user;
+      const company = await this.companyModel.findOne({ _id: companyId }).lean();
+      if (!companyIds.map((id) => id.toString()).includes(companyId.toString()) || !company) {
+        throw new ForbiddenException('Not allowed to invite user for this company');
+      }
+      const foundUser = await this.userModel.findOne({ email }).lean();
+      const userId = foundUser?._id;
+
+      const createInviteDto = {
+        userId,
+        companyId,
+        roleId,
+        firstName,
+        lastName,
+        email,
+        type: InviteType.userToUser,
+      };
+
+      const invite = await this.invitesService.createInvite(createInviteDto);
+
+      const link = `${url}/${userId ? 'invite' : 'register'}/${companyId}/${invite.link}`;
+
+      const emailData: TMailData = {
+        email,
+        content: {
+          type: TemplateType.existingCompanyUser,
+          context: {
+            link,
+            userName: `${firstName} ${lastName}`,
+            companyName: company?.name,
+          },
+        },
+      };
+
+      await this.emailService.sendMail(emailData);
+      return 'it worked';
+    } catch (ex) {
+      console.error(ex);
+    }
   }
 
   async createUser(user: CreateUserRequestDTO) {
@@ -178,14 +230,11 @@ export class UsersService {
     }
   }
 
-  async createAccountOwner(_id: Types.ObjectId, newUserBody: CreateAccountOwnerRequestDTO) {
+  async createCompanyUser(_id: Types.ObjectId, newUserBody: CreateAccountUserDto) {
     try {
-      const { firstName, lastName, email, phone, password, linkId, companyId } = newUserBody;
-      const verifiedInvite = await this.inviteModel.findOne({ _id, companyId, link: linkId });
+      const { firstName, lastName, email, phone, password, linkId, companyId, roleId } = newUserBody;
+      const verifiedInvite = await this.inviteModel.findOne({ _id, companyId, link: linkId }).lean();
       if (verifiedInvite) {
-        const adminRole = await this.roleModel.findOne({ name: 'Admin' });
-        const adminRoleId = adminRole._id;
-
         const newUser = new this.userModel({
           companies: [companyId],
           firstName,
@@ -195,11 +244,13 @@ export class UsersService {
           password,
         });
 
+        const isAccountOwner = verifiedInvite.type === 'welcomeAboard' ? true : false;
+
         return newUser.save().then(async (user) => {
           const userId = user._id;
-          await this.userCompanyModel.create({ companyId, userId, roleId: adminRoleId, isAccountOwner: true });
+          await this.userCompanyModel.create({ companyId, userId, roleId, isAccountOwner });
           await this.inviteModel.findOneAndUpdate({ _id }, { status: 'accepted', dateUpdated: new Date(), userId });
-          await this.companyModel.findOneAndUpdate({ _id: companyId }, { accountOwner: newUser._id });
+          if (isAccountOwner) await this.companyModel.findOneAndUpdate({ _id: companyId }, { accountOwner: newUser._id });
           return user.toObject();
         });
       } else {

@@ -1,6 +1,7 @@
 export enum TemplateType {
   newCompanyNewUser = 'newCompanyNewUser',
   newCompanyExistingUser = 'newCompanyExistingUser',
+  existingCompanyUser = 'existingCompanyUser',
   passwordReset = 'passwordReset',
 }
 
@@ -22,6 +23,15 @@ type TNewCompanyExistingUser = {
   type: TemplateType.newCompanyExistingUser;
 };
 
+type TExistingCompanyUser = {
+  context: {
+    userName: string;
+    companyName: string;
+    link: string;
+  };
+  type: TemplateType.existingCompanyUser;
+};
+
 type TPasswordReset = {
   context: {
     userName: string;
@@ -33,5 +43,5 @@ type TPasswordReset = {
 
 export type TMailData = {
   email: string;
-  content: TWelcomeAboard | TPasswordReset | TNewCompanyExistingUser;
+  content: TWelcomeAboard | TPasswordReset | TNewCompanyExistingUser | TExistingCompanyUser;
 };

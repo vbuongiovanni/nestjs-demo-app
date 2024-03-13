@@ -58,6 +58,7 @@ export class CompaniesController {
   }
 
   @Delete('/:_id')
+  @ReqAuthType(AuthType.Admin)
   async removeCompany(@ActiveUser() activeUser: IActiveUser, @ObjectIdParam('_id') _id: Types.ObjectId): Promise<CompanyResponseDto> {
     const companies: Types.ObjectId[] = activeUser.companies || [];
     const removedCompany = await this.companiesService.removeCompany({ $and: [{ _id }, { companies: { $in: companies } }] });

@@ -8,6 +8,9 @@ export class CreateInviteRequestDto {
   @IsNotEmpty()
   companyId: Types.ObjectId;
 
+  @IsNotEmpty()
+  roleId: Types.ObjectId;
+
   @IsOptional()
   userId: Types.ObjectId;
 
@@ -53,6 +56,11 @@ export class InviteResponseDto {
   @IsNotEmpty()
   @ConvertIdType('string')
   companyId: Types.ObjectId;
+
+  @Expose()
+  @IsNotEmpty()
+  @ConvertIdType('string')
+  roleId: Types.ObjectId;
 
   @Expose()
   @IsOptional()

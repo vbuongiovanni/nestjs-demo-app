@@ -25,13 +25,37 @@ export class CreateUserRequestDTO {
   password: string;
 }
 
-export class CreateAccountOwnerRequestDTO {
+export class InviteUserRequestDTO {
+  @IsNotEmpty()
+  @ConvertIdType('objectId')
+  companyId: Types.ObjectId;
+
+  @IsNotEmpty()
+  @ConvertIdType('objectId')
+  roleId: Types.ObjectId;
+
+  @IsNotEmpty()
+  firstName: string;
+
+  @IsNotEmpty()
+  lastName: string;
+
+  @IsNotEmpty()
+  @IsEmail()
+  email: string;
+}
+
+export class CreateAccountUserDto {
   @IsNotEmpty()
   linkId: string;
 
   @IsNotEmpty()
   @ConvertIdType('objectId')
   companyId: Types.ObjectId;
+
+  @IsNotEmpty()
+  @ConvertIdType('objectId')
+  roleId: Types.ObjectId;
 
   @IsNotEmpty()
   firstName: string;

@@ -6,6 +6,8 @@ import { Company, CompanySchema, Invite, InviteSchema, Role, RoleSchema, User, U
 import { ConfigService } from '@nestjs/config';
 import { LoggerModule } from '../../logger/logger.module';
 import { UserCompanies, UserCompaniesSchema } from 'src/mongodb/schemas/user-companies';
+import { InvitesService } from '../invites/invites.service';
+import { EmailService } from '../email/email.service';
 
 @Module({
   imports: [
@@ -19,7 +21,7 @@ import { UserCompanies, UserCompaniesSchema } from 'src/mongodb/schemas/user-com
     LoggerModule,
   ],
   controllers: [UsersController],
-  providers: [UsersService, ConfigService],
+  providers: [UsersService, ConfigService, InvitesService, EmailService],
   exports: [UsersService],
 })
 export class UsersModule {}

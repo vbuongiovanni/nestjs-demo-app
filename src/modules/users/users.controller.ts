@@ -1,7 +1,14 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UsePipes, Req } from '@nestjs/common';
 import { HashPasswordPipe } from '../../common/pipes/hash-password.pipe';
 import { UsersService } from './users.service';
-import { CreateAccountOwnerRequestDTO, CreateUserRequestDTO, RespondToInviteDTO, UpdateUserRequestDTO, UserResponseDTO } from './user.dto';
+import {
+  CreateAccountUserDto,
+  CreateUserRequestDTO,
+  InviteUserRequestDTO,
+  RespondToInviteDTO,
+  UpdateUserRequestDTO,
+  UserResponseDTO,
+} from './user.dto';
 import { plainToInstance } from 'class-transformer';
 import { Types } from 'mongoose';
 import { ActiveUser, ObjectIdParam, ReqAuthType } from 'src/common/decorators';
@@ -12,6 +19,13 @@ import { UserCompanyRoleResponseDto } from '../roles/roles.dto';
 @ReqAuthType(AuthType.Bearer)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
+
+  @Post('/invite')
+  async inviteUser(@ActiveUser() activeUser: IActiveUser, @Body() inviteUserBody: InviteUserRequestDTO): Promise<UserResponseDTO> {
+    const { companies, userId } = activeUser;
+    const newUser = await this.usersService.inviteUser(inviteUserBody, userId, companies);
+    return plainToInstance(UserResponseDTO, newUser, { excludeExtraneousValues: true });
+  }
 
   @Patch('/invite/:inviteId')
   async respondToInvite(
@@ -27,11 +41,11 @@ export class UsersController {
   @Post('/register/:inviteId')
   @ReqAuthType(AuthType.Public)
   @UsePipes(HashPasswordPipe)
-  async createAccountOwner(
+  async createCompanyUser(
     @ObjectIdParam('inviteId') inviteId: Types.ObjectId,
-    @Body() createUserBody: CreateAccountOwnerRequestDTO,
+    @Body() createUserBody: CreateAccountUserDto,
   ): Promise<UserResponseDTO> {
-    const newUser = await this.usersService.createAccountOwner(inviteId, createUserBody);
+    const newUser = await this.usersService.createCompanyUser(inviteId, createUserBody);
     return plainToInstance(UserResponseDTO, newUser, { excludeExtraneousValues: true });
   }
 
