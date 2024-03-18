@@ -13,7 +13,8 @@ export function ConvertIdType(transformTo: TConversion, isArray?: boolean) {
         const stringArray = Array.isArray(params.obj[propertyKey]) ? params.obj[propertyKey] : [params.obj[propertyKey]];
         return stringArray.map((id) => conversionCallBack(id));
       } else {
-        return conversionCallBack(params.obj[propertyKey]);
+        const newValue = conversionCallBack(params.obj[propertyKey]);
+        return newValue;
       }
     })(target, propertyKey);
   };

@@ -5,6 +5,11 @@
       "description": "Generates boilerplate code for controller spec, including all support mock/stub files.",
       "factory": "./controller-spec/index#generate",
       "schema": "./controller-spec/schema.json"
+    },
+    "service-spec": {
+      "description": "Generates scaffolding for a new service spec, including the supporting model mock and stubs.",
+      "factory": "./service-spec/index#generate",
+      "schema": "./service-spec/schema.json"
     }
   }
 }

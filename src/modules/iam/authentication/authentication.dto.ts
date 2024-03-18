@@ -1,5 +1,7 @@
-import { Expose } from 'class-transformer';
-import { IsEmail, IsNotEmpty, Length } from 'class-validator';
+import { Expose, Type } from 'class-transformer';
+import { IsEmail, IsNotEmpty, IsOptional, Length, Validate, ValidateNested } from 'class-validator';
+import { ConvertIdType } from 'src/common/decorators';
+import { Types } from 'mongoose';
 
 export class RegisterRequestDTO {
   @IsNotEmpty()
@@ -47,9 +49,22 @@ export class AuthRequestDTO {
 
   @IsNotEmpty()
   password: string;
+
+  @IsOptional()
+  @ConvertIdType('objectId')
+  activeCompanyId: Types.ObjectId;
+}
+
+export class RefreshTokenRequestDto {
+  @IsNotEmpty()
+  refreshToken: string;
 }
 
 export class AuthResponseDTO {
+  @IsNotEmpty()
+  @Expose()
+  responseType: 'tokens';
+
   @IsNotEmpty()
   @Expose()
   accessToken: string;
@@ -59,7 +74,22 @@ export class AuthResponseDTO {
   refreshToken: string;
 }
 
-export class RefreshTokenRequestDto {
+class Company {
+  @Expose()
+  @ConvertIdType('objectId')
+  _id: Types.ObjectId;
+
+  @Expose()
+  name: string;
+}
+
+export class AuthCompanySelectionResponseDTO {
   @IsNotEmpty()
-  refreshToken: string;
+  @Expose()
+  responseType: 'companySelection';
+
+  @Expose()
+  @ValidateNested({ each: true })
+  @Type(() => Company)
+  companies: Company[];
 }

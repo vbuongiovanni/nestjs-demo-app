@@ -6,7 +6,11 @@ export const ActiveUser = createParamDecorator((field: keyof IUser, ctx: Executi
   const request = ctx.switchToHttp().getRequest();
   const user: IUser | undefined = request['user'];
   const token = user as unknown as { sub: string };
-  const companies = user?.companies?.map((companyId) => new Types.ObjectId(companyId)) || [];
-  const modifiedUser = { ...user, companies, userId: new Types.ObjectId(token.sub) };
+  const modifiedUser = {
+    ...user,
+    userId: new Types.ObjectId(token.sub),
+    companyId: new Types.ObjectId(user.companyId),
+    roleId: new Types.ObjectId(user.roleId),
+  };
   return field ? modifiedUser?.[field] : modifiedUser;
 });

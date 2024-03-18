@@ -18,8 +18,8 @@ export class InvitesController {
 
   @Get()
   async findInvites(@ActiveUser() activeUser: IActiveUser) {
-    const companies: Types.ObjectId[] = activeUser.companies || [];
-    const invites = await this.invitesService.findAllInvites({ companies: { $in: companies } });
+    const { companyId } = activeUser;
+    const invites = await this.invitesService.findAllInvites({ companies: { $in: [companyId] } });
     return plainToInstance(InviteResponseDto, invites, { excludeExtraneousValues: true });
   }
 
@@ -33,8 +33,8 @@ export class InvitesController {
 
   @Get('/:_id')
   async findInvite(@ActiveUser() activeUser: IActiveUser, @ObjectIdParam('_id') _id: Types.ObjectId) {
-    const companies: Types.ObjectId[] = activeUser.companies || [];
-    const invites = await this.invitesService.findInvite({ $and: [{ _id }, { companies: { $in: companies } }] });
+    const { companyId } = activeUser;
+    const invites = await this.invitesService.findInvite({ $and: [{ _id }, { companies: { $in: [companyId] } }] });
     return plainToInstance(InviteResponseDto, invites, { excludeExtraneousValues: true });
   }
 
@@ -44,8 +44,11 @@ export class InvitesController {
     @ObjectIdParam('_id') _id: Types.ObjectId,
     @Body() updateInviteBody: UpdateInviteRequestDto,
   ) {
-    const companies: Types.ObjectId[] = activeUser.companies || [];
-    const updatedInvite = await this.invitesService.updateInvite({ $and: [{ _id }, { companies: { $in: companies } }] }, updateInviteBody);
+    const { companyId } = activeUser;
+    const updatedInvite = await this.invitesService.updateInvite(
+      { $and: [{ _id }, { companies: { $in: [companyId] } }] },
+      updateInviteBody,
+    );
     return plainToInstance(InviteResponseDto, updatedInvite, { excludeExtraneousValues: true });
   }
 

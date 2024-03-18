@@ -16,12 +16,16 @@ import { AuthGuard } from './authentication/guards';
 import { BearerGuard } from './authentication/guards/bearer.guard';
 import { AdminGuard } from './authentication/guards/admin.guard';
 import { PermissionGuard } from './authorization/Permissions.guard';
+import { UserCompanies, UserCompaniesSchema } from 'src/mongodb/schemas/user-companies';
 
 @Module({
   imports: [
     ConfigModule.forFeature(jwtConfig),
     JwtModule.registerAsync(jwtConfig.asProvider()),
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: UserCompanies.name, schema: UserCompaniesSchema },
+    ]),
     CacheModule.registerAsync(redisConfig),
   ],
   providers: [

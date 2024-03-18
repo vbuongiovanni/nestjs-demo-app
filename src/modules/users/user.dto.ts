@@ -1,8 +1,7 @@
-import { Exclude, Expose } from 'class-transformer';
-import { IsEmail, IsNotEmpty, IsOptional, ValidateNested } from 'class-validator';
+import { Expose } from 'class-transformer';
+import { IsEmail, IsNotEmpty, IsOptional } from 'class-validator';
 import { ConvertIdType } from '../../common/decorators';
 import { Types } from 'mongoose';
-import { RoleResponseDto, UserCompanyRoleResponseDto } from '../roles/roles.dto';
 
 export class CreateUserRequestDTO {
   @IsNotEmpty()

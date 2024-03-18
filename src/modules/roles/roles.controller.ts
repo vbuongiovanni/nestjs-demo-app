@@ -22,8 +22,8 @@ export class RolesController {
 
   @Get('/userCompanyRoles')
   async findAllUserCompanyRoles(@ActiveUser() activeUser: IActiveUser): Promise<UserCompanyRoleResponseDto[]> {
-    const companies: Types.ObjectId[] = activeUser.companies || [];
-    const userCompanyRoles = await this.rolesService.findAllUserCompanyRoles({ companyId: { $in: companies } });
+    const { companyId } = activeUser;
+    const userCompanyRoles = await this.rolesService.findAllUserCompanyRoles({ companyId: { $in: [companyId] } });
     return plainToInstance(UserCompanyRoleResponseDto, userCompanyRoles, { excludeExtraneousValues: true });
   }
 

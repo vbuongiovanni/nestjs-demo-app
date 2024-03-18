@@ -58,10 +58,9 @@ export class UsersController {
 
   @Get('/activeUser')
   async findActiveUser(@ActiveUser() activeUser: IActiveUser, @ObjectIdParam('_id') _id: Types.ObjectId) {
-    const companies: Types.ObjectId[] = activeUser.companies || [];
-    const userId = activeUser.userId;
+    const { userId, companyId } = activeUser;
     const { user, userCompanyRoles } = await this.usersService.findActiveUser({
-      $and: [{ _id: userId }, { companies: { $in: companies } }],
+      $and: [{ _id: userId }, { companies: { $in: [companyId] } }],
     });
     const userDto = plainToInstance(UserResponseDTO, user, { excludeExtraneousValues: true });
     const userCompanyRolesDto = plainToInstance(UserCompanyRoleResponseDto, userCompanyRoles, { excludeExtraneousValues: true });
@@ -78,15 +77,15 @@ export class UsersController {
 
   @Get()
   async findAllUsers(@ActiveUser() activeUser: IActiveUser): Promise<UserResponseDTO[]> {
-    const companies: Types.ObjectId[] = activeUser.companies || [];
-    const users = await this.usersService.findAllUsers({ companies: { $in: companies } });
+    const { companyId } = activeUser;
+    const users = await this.usersService.findAllUsers({ companies: { $in: [companyId] } });
     return plainToInstance(UserResponseDTO, users, { excludeExtraneousValues: true });
   }
 
   @Get('/:_id')
   async findUser(@ActiveUser() activeUser: IActiveUser, @ObjectIdParam('_id') _id: Types.ObjectId): Promise<UserResponseDTO> {
-    const companies: Types.ObjectId[] = activeUser.companies || [];
-    const user = await this.usersService.findUser({ $and: [{ _id }, { companies: { $in: companies } }] });
+    const { companyId } = activeUser;
+    const user = await this.usersService.findUser({ $and: [{ _id }, { companies: { $in: [companyId] } }] });
     return plainToInstance(UserResponseDTO, user, { excludeExtraneousValues: true });
   }
 
@@ -96,15 +95,15 @@ export class UsersController {
     @ObjectIdParam('_id') _id: Types.ObjectId,
     @Body() updateUserBody: Partial<UpdateUserRequestDTO>,
   ): Promise<UserResponseDTO> {
-    const companies: Types.ObjectId[] = activeUser.companies || [];
-    const updatedUser = this.usersService.updateUser({ $and: [{ _id }, { companies: { $in: companies } }] }, updateUserBody);
+    const { companyId } = activeUser;
+    const updatedUser = this.usersService.updateUser({ $and: [{ _id }, { companies: { $in: [companyId] } }] }, updateUserBody);
     return plainToInstance(UserResponseDTO, updatedUser, { excludeExtraneousValues: true });
   }
 
   @Delete('/:_id')
   async removeUser(@ActiveUser() activeUser: IActiveUser, @ObjectIdParam('_id') _id: Types.ObjectId): Promise<UserResponseDTO> {
-    const companies: Types.ObjectId[] = activeUser.companies || [];
-    await this.usersService.removeUser({ $and: [{ _id }, { companies: { $in: companies } }] });
+    const { companyId } = activeUser;
+    await this.usersService.removeUser({ $and: [{ _id }, { companies: { $in: [companyId] } }] });
     return undefined;
   }
 }

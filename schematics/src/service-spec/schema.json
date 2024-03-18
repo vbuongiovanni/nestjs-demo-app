@@ -1,0 +1,35 @@
+{
+  "$schema": "http://json-schema.org/schema",
+  "$id": "service-spec",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the service spec.",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "What is the name of the module you would like to create the service spec scaffolding for? Enter name in kabob-case e.g., 'users' or 'property-managements'."
+    },
+    "path": {
+      "type": "string",
+      "description": "The directory path to where you want the scaffolding to be created.",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "Directory name of where you would like to create the scaffolding (relative to './apps/doorcast/api/src/app/'). Leave blank to create scaffolding using the module name in the 'api/' folder."
+    },
+    "dependencies": {
+      "type": "string",
+      "description": "A list of all Models used in service, other than the one being created.",
+      "$default": {
+        "$source": "argv",
+        "index": 0
+      },
+      "x-prompt": "Provide all models used in service (excluding the model named after the service) as a comma separated string. Write as a singular name (e.g., 'Unit, UnitType, Audit')."
+    }
+  },
+  "required": ["name"]
+}
