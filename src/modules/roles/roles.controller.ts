@@ -27,6 +27,14 @@ export class RolesController {
     return plainToInstance(UserCompanyRoleResponseDto, userCompanyRoles, { excludeExtraneousValues: true });
   }
 
+  @Get('/userCompanyRoles/admin')
+  @ReqAuthType(AuthType.Bearer)
+  @ReqAuthType(AuthType.Admin)
+  async findAllUserCompanyRolesAdmin(): Promise<UserCompanyRoleResponseDto[]> {
+    const userCompanyRoles = await this.rolesService.findAllUserCompanyRolesAdmin();
+    return plainToInstance(UserCompanyRoleResponseDto, userCompanyRoles, { excludeExtraneousValues: true });
+  }
+
   @Get()
   async findAllRoles(): Promise<RoleResponseDto[]> {
     const allRoles = await this.rolesService.findAllRoles();

@@ -30,6 +30,7 @@ export class CompaniesController {
   }
 
   @Get('/admin')
+  @ReqAuthType(AuthType.Bearer)
   @ReqAuthType(AuthType.Admin)
   async findAllCompaniesAdmin(): Promise<CompanyResponseDto[]> {
     const allCompanies = await this.companiesService.findAllCompaniesAdmin();

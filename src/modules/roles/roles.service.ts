@@ -40,6 +40,26 @@ export class RolesService {
     }
   }
 
+  async findAllUserCompanyRolesAdmin() {
+    try {
+      const userCompanyRoles: UserCompaniesDocument[] = await this.userCompanyModel.aggregate([
+        {
+          $lookup: {
+            from: 'roles',
+            localField: 'roleId',
+            foreignField: '_id',
+            as: 'role',
+          },
+        },
+        { $unwind: '$role' },
+      ]);
+      return userCompanyRoles;
+    } catch (ex) {
+      this.customLogger.logger(`Error in roles.service.findAllUserCompanyRoles(): ${ex.message}`, ex);
+      return null;
+    }
+  }
+
   async createRole(createRoleDto: CreateRoleRequestDto) {
     try {
       const newRole = new this.roleModel(createRoleDto);

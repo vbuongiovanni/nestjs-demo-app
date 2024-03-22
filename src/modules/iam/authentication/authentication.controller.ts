@@ -32,7 +32,6 @@ export class AuthController {
   @Post('refresh-token')
   async refreshTokens(@Body() refreshTokenDto: RefreshTokenRequestDto): Promise<AuthResponseDTO> {
     const refreshTokenData = await this.authService.refreshToken(refreshTokenDto);
-    console.log(refreshTokenData);
     return plainToInstance(AuthResponseDTO, refreshTokenData, { excludeExtraneousValues: true });
   }
 
