@@ -1,5 +1,5 @@
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
-import { CreateAccountUserDto, CreateUserRequestDTO, UpdateUserRequestDTO } from '../../modules/users/user.dto';
+import { CreateAccountUserDto, CreateUserRequestDTO } from '../../modules/users/user.dto';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 

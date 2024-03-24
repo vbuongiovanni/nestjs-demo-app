@@ -1,5 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { CreateAccountUserDto, CreateUserRequestDTO, InviteUserRequestDTO, RespondToInviteDTO, UpdateUserRequestDTO } from './user.dto';
+import { CreateAccountUserDto, CreateUserRequestDTO, InviteUserRequestDTO, RespondToInviteDTO, UpdateUserDTO } from './user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Company, CompanyDocument, Invite, InviteDocument, InviteType, Role, RoleDocument, User, UserDocument } from '../../mongodb';
@@ -12,8 +12,12 @@ import { ConfigService } from '@nestjs/config';
 import { TMailData, TemplateType } from '../email/types';
 import { EmailService } from '../email/email.service';
 import { randomUUID } from 'crypto';
+import { IUser } from 'src/common/types';
 
-type TQuery = { $and: [{ _id: Types.ObjectId }, { companies: { $in: Types.ObjectId[] } }] } | { companies: { $in: Types.ObjectId[] } };
+type TQuery =
+  | { $and: [{ _id: Types.ObjectId }, { companies: { $in: Types.ObjectId[] } }] }
+  | { companies: { $in: Types.ObjectId[] } }
+  | { _id: Types.ObjectId };
 
 @Injectable()
 export class UsersService {
@@ -31,49 +35,48 @@ export class UsersService {
     this.customLogger.setContext('UserService');
   }
 
-  async inviteUser(user: InviteUserRequestDTO, activeUserId: Types.ObjectId, companyIds: Types.ObjectId[]) {
-    console.log(user);
-    try {
-      const url = this.configService.get<string>('FRONTEND_URL');
-      const { firstName, lastName, email, companyId, roleId } = user;
-      const company = await this.companyModel.findOne({ _id: companyId }).lean();
-      if (!companyIds.map((id) => id.toString()).includes(companyId.toString()) || !company) {
-        throw new ForbiddenException('Not allowed to invite user for this company');
-      }
-      const foundUser = await this.userModel.findOne({ email }).lean();
-      const userId = foundUser?._id;
-
-      const createInviteDto = {
-        userId,
-        companyId,
-        roleId,
-        firstName,
-        lastName,
-        email,
-        type: InviteType.userToUser,
-      };
-
-      const invite = await this.invitesService.createInvite(createInviteDto);
-
-      const link = `${url}/${userId ? 'invite' : 'register'}/${companyId}/${invite.link}`;
-
-      const emailData: TMailData = {
-        email,
-        content: {
-          type: TemplateType.existingCompanyUser,
-          context: {
-            link,
-            userName: `${firstName} ${lastName}`,
-            companyName: company?.name,
-          },
-        },
-      };
-
-      await this.emailService.sendMail(emailData);
-      return 'it worked';
-    } catch (ex) {
-      console.error(ex);
+  async inviteUser(user: InviteUserRequestDTO, activeCompanyId: Types.ObjectId) {
+    const url = this.configService.get<string>('FRONTEND_URL');
+    const { firstName, lastName, email, companyId, roleId } = user;
+    const foundUser = await this.userModel.findOne({ email }).lean();
+    const userId = foundUser?._id;
+    const existingCompanyRole = await this.userCompanyModel.findOne({ userId, companyId }).lean();
+    if (existingCompanyRole) {
+      throw new BadRequestException('User already exists in this company');
     }
+    const company = await this.companyModel.findOne({ _id: companyId }).lean();
+    if (companyId.toString() !== activeCompanyId.toString()) {
+      throw new ForbiddenException('Not allowed to invite user for this company');
+    }
+
+    const createInviteDto = {
+      userId,
+      companyId,
+      roleId,
+      firstName,
+      lastName,
+      email,
+      type: InviteType.userToUser,
+    };
+
+    const invite = await this.invitesService.createInvite(createInviteDto);
+
+    const link = `${url}/${userId ? 'invite' : 'register'}/${companyId}/${invite.link}`;
+
+    const emailData: TMailData = {
+      email,
+      content: {
+        type: TemplateType.existingCompanyUser,
+        context: {
+          link,
+          userName: `${firstName} ${lastName}`,
+          companyName: company?.name,
+        },
+      },
+    };
+
+    await this.emailService.sendMail(emailData);
+    return invite;
   }
 
   async createUser(user: CreateUserRequestDTO) {
@@ -89,20 +92,14 @@ export class UsersService {
     }
   }
 
-  findAllUsers(query: TQuery) {
+  async findAllUsers(query?: TQuery, companyId?: Types.ObjectId) {
     try {
-      const users = this.userModel.find(query).lean();
-      return users;
-    } catch (ex) {
-      this.customLogger.logger(`Error in users.service userModel.find: ${ex.message}`, ex);
-      return [];
-    }
-  }
-
-  findAllUsersAdmin() {
-    try {
-      const users = this.userModel.find().lean();
-      return users;
+      const users = await this.userModel.find(query).lean();
+      if (query) {
+        return users.map((user) => ({ ...user, companies: [companyId] }));
+      } else {
+        return users;
+      }
     } catch (ex) {
       this.customLogger.logger(`Error in users.service userModel.find: ${ex.message}`, ex);
       return [];
@@ -154,13 +151,31 @@ export class UsersService {
     }
   }
 
-  updateUser(query: TQuery, user: Partial<UpdateUserRequestDTO>) {
+  async updateUser(userId: Types.ObjectId, user: Partial<UpdateUserDTO>, activeUserCompanyId: Types.ObjectId) {
+    const { companyId } = user;
+    if (companyId.toString() !== activeUserCompanyId.toString()) {
+      throw new ForbiddenException('Not allowed to update user for this company');
+    }
+    const propertiesToUpdate = Object.keys(user);
+    const userUpdateReq = propertiesToUpdate.some((property) => ['firstName', 'lastName', 'email', 'phone'].includes(property));
+    const userCompanyRolesUpdateReq = propertiesToUpdate.some((property) => ['roleId', 'isAccountOwner'].includes(property));
     try {
-      const updatedUser = this.userModel.findOneAndUpdate(query, user, { new: true }).lean();
-      if (!updatedUser) {
-        throw new NotFoundException('User not found');
+      if (userUpdateReq) {
+        const updatedUser = await this.userModel.findOneAndUpdate({ _id: userId }, user, { new: true }).lean();
+        if (!updatedUser) {
+          throw new NotFoundException('User not found');
+        }
       }
-      return updatedUser;
+      if (userCompanyRolesUpdateReq) {
+        const updates: { roleId?: Types.ObjectId; isAccountOwner?: boolean } = {};
+        if (user?.roleId) updates.roleId = user.roleId;
+        if (user?.isAccountOwner) updates.isAccountOwner = user.isAccountOwner;
+        const updatedRole = await this.userCompanyModel.findOneAndUpdate({ userId, companyId }, updates, { new: true }).lean();
+        if (!updatedRole) {
+          throw new NotFoundException('Company-Role not found for user');
+        }
+      }
+      return user;
     } catch (ex) {
       if (ex.message === 'User not found') {
         throw ex;

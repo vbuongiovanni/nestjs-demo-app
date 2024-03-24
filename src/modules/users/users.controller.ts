@@ -6,7 +6,7 @@ import {
   CreateUserRequestDTO,
   InviteUserRequestDTO,
   RespondToInviteDTO,
-  UpdateUserRequestDTO,
+  UpdateUserDTO,
   UserResponseDTO,
 } from './user.dto';
 import { plainToInstance } from 'class-transformer';
@@ -14,6 +14,7 @@ import { Types } from 'mongoose';
 import { ActiveUser, ObjectIdParam, ReqAuthType } from 'src/common/decorators';
 import { AuthType, IActiveUser } from 'src/common/types';
 import { UserCompanyRoleResponseDto } from '../roles/roles.dto';
+import { InviteResponseDto } from '../invites/invites.dto';
 
 @Controller('users')
 @ReqAuthType(AuthType.Bearer)
@@ -21,10 +22,17 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Post('/invite')
-  async inviteUser(@ActiveUser() activeUser: IActiveUser, @Body() inviteUserBody: InviteUserRequestDTO): Promise<UserResponseDTO> {
-    const { companies, userId } = activeUser;
-    const newUser = await this.usersService.inviteUser(inviteUserBody, userId, companies);
-    return plainToInstance(UserResponseDTO, newUser, { excludeExtraneousValues: true });
+  async inviteUser(@ActiveUser() activeUser: IActiveUser, @Body() inviteUserBody: InviteUserRequestDTO): Promise<InviteResponseDto> {
+    const { companyId } = activeUser;
+    const newUser = await this.usersService.inviteUser(inviteUserBody, companyId);
+    return plainToInstance(InviteResponseDto, newUser, { excludeExtraneousValues: true });
+  }
+
+  @Post('/invite/admin')
+  async inviteUserAdmin(@Body() inviteUserBody: InviteUserRequestDTO): Promise<InviteResponseDto> {
+    const companyId = inviteUserBody.companyId;
+    const newUser = await this.usersService.inviteUser(inviteUserBody, companyId);
+    return plainToInstance(InviteResponseDto, newUser, { excludeExtraneousValues: true });
   }
 
   @Patch('/invite/:inviteId')
@@ -71,14 +79,14 @@ export class UsersController {
   @ReqAuthType(AuthType.Bearer)
   @ReqAuthType(AuthType.Admin)
   async findAllUsersAdmin(): Promise<UserResponseDTO[]> {
-    const users = await this.usersService.findAllUsersAdmin();
+    const users = await this.usersService.findAllUsers();
     return plainToInstance(UserResponseDTO, users, { excludeExtraneousValues: true });
   }
 
   @Get()
   async findAllUsers(@ActiveUser() activeUser: IActiveUser): Promise<UserResponseDTO[]> {
     const { companyId } = activeUser;
-    const users = await this.usersService.findAllUsers({ companies: { $in: [companyId] } });
+    const users = await this.usersService.findAllUsers({ companies: { $in: [companyId] } }, companyId);
     return plainToInstance(UserResponseDTO, users, { excludeExtraneousValues: true });
   }
 
@@ -93,11 +101,20 @@ export class UsersController {
   async updateUser(
     @ActiveUser() activeUser: IActiveUser,
     @ObjectIdParam('_id') _id: Types.ObjectId,
-    @Body() updateUserBody: Partial<UpdateUserRequestDTO>,
-  ): Promise<UserResponseDTO> {
+    @Body() updateUserBody: UpdateUserDTO,
+  ): Promise<UpdateUserDTO> {
     const { companyId } = activeUser;
-    const updatedUser = this.usersService.updateUser({ $and: [{ _id }, { companies: { $in: [companyId] } }] }, updateUserBody);
-    return plainToInstance(UserResponseDTO, updatedUser, { excludeExtraneousValues: true });
+    const updatedUser = this.usersService.updateUser(_id, updateUserBody, companyId);
+    return plainToInstance(UpdateUserDTO, updatedUser, { excludeExtraneousValues: true });
+  }
+
+  @Patch('/:_id/admin')
+  @ReqAuthType(AuthType.Bearer)
+  @ReqAuthType(AuthType.Admin)
+  async updateUserAdmin(@ObjectIdParam('_id') _id: Types.ObjectId, @Body() updateUserBody: UpdateUserDTO): Promise<UpdateUserDTO> {
+    const companyId = updateUserBody.companyId;
+    const updatedUser = await this.usersService.updateUser(_id, updateUserBody, companyId);
+    return plainToInstance(UpdateUserDTO, updatedUser, { excludeExtraneousValues: true });
   }
 
   @Delete('/:_id')

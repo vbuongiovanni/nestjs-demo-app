@@ -19,7 +19,7 @@ export class InvitesController {
   @Get()
   async findInvites(@ActiveUser() activeUser: IActiveUser) {
     const { companyId } = activeUser;
-    const invites = await this.invitesService.findAllInvites({ companies: { $in: [companyId] } });
+    const invites = await this.invitesService.findAllInvites({ companyId });
     return plainToInstance(InviteResponseDto, invites, { excludeExtraneousValues: true });
   }
 

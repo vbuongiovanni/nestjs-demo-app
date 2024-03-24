@@ -1,4 +1,4 @@
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { IsNotEmpty, ValidateNested } from 'class-validator';
 import { ConvertIdType } from 'src/common/decorators';
 import { TPermission } from 'src/common/types';
@@ -50,5 +50,6 @@ export class UserCompanyRoleResponseDto {
 
   @Expose()
   @ValidateNested()
+  @Type(() => RoleResponseDto)
   role: RoleResponseDto;
 }

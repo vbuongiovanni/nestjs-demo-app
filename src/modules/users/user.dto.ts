@@ -81,22 +81,37 @@ export class RespondToInviteDTO {
   action: 'accept' | 'reject';
 }
 
-export class UpdateUserRequestDTO {
+export class UpdateUserDTO {
+  @Expose()
   @IsOptional()
   firstName: string;
 
+  @Expose()
   @IsOptional()
   lastName: string;
 
+  @Expose()
+  @IsNotEmpty()
+  phone: string;
+
+  @Expose()
   @IsNotEmpty()
   @IsEmail()
   email: string;
 
+  @Expose()
   @IsOptional()
-  password: string;
+  @ConvertIdType('objectId')
+  roleId: Types.ObjectId;
 
+  @Expose()
   @IsOptional()
-  isCompanyAdmin: boolean;
+  isAccountOwner: boolean;
+
+  @Expose()
+  @IsOptional()
+  @ConvertIdType('objectId')
+  companyId: Types.ObjectId;
 }
 
 export class UserResponseDTO {
@@ -122,4 +137,8 @@ export class UserResponseDTO {
   @IsEmail()
   @Expose()
   email: string;
+
+  @IsNotEmpty()
+  @Expose()
+  phone: string;
 }
